@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muhikira Darcie - Modern Enterprise Daily Report & Business Suite (MDDR v2.8)</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        momo: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- html2pdf.js for exporting styled PDF reports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Font Size Utilities (Fixed with high specificity) */
+        html.text-size-sm { font-size: 13px !important; }
+        html.text-size-md { font-size: 15px !important; }
+        html.text-size-lg { font-size: 17px !important; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+        .dark ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 9999px; }
+
+        /* Print Specific Adjustments for A4 Financial Report */
+        @media print {
+            body * { visibility: hidden !important; }
+            #pdf-report-document, #pdf-report-document * { visibility: visible !important; }
+            #pdf-report-document {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                background: #ffffff !important;
+                color: #111827 !important;
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 15mm !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100 min-h-screen transition-colors duration-200">
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3 pointer-events-none"></div>
+
+    <!-- Main Outer Wrapper -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 z-30 fixed lg:relative h-full -translate-x-full lg:translate-x-0 no-print">
+            <div class="p-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg">
+                        MD
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-base tracking-tight leading-tight text-gray-900 dark:text-white">Muhikira Darcie</h1>
+                        <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Enterprise v2.8 + Firestore</p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-chart-line w-5 text-center text-lg"></i>
+                    <span>Dashboard & Forecasting</span>
+                </button>
+                <button onclick="switchTab('records')" id="nav-records" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-list-check w-5 text-center text-lg"></i>
+                    <span>Client Records & Ledger</span>
+                </button>
+                <button onclick="switchTab('booking')" id="nav-booking" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-calendar-check w-5 text-center text-lg"></i>
+                    <span>Booking & Ordering</span>
+                </button>
+                <button onclick="switchTab('entry')" id="nav-entry" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-user-plus w-5 text-center text-lg"></i>
+                    <span>New Client Entry</span>
+                </button>
+                <button onclick="switchTab('crm')" id="nav-crm" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-users-viewfinder w-5 text-center text-lg"></i>
+                    <span>CRM & Client Loyalty</span>
+                </button>
+                <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-boxes-stacked w-5 text-center text-lg"></i>
+                    <span>Stock & Inventory</span>
+                </button>
+                <button onclick="switchTab('expenses')" id="nav-expenses" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-receipt w-5 text-center text-lg"></i>
+                    <span>Expenses & Net Profit</span>
+                </button>
+                <button onclick="switchTab('tax')" id="nav-tax" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-calculator w-5 text-center text-lg"></i>
+                    <span>Tax & Profit Analytics</span>
+                </button>
+                <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-lg"></i>
+                    <span>Export PDF & Statements</span>
+                </button>
+                <button onclick="switchTab('audit')" id="nav-audit" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center text-lg"></i>
+                    <span>Audit Trail Log</span>
+                </button>
+                <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-gear w-5 text-center text-lg"></i>
+                    <span>App Settings</span>
+                </button>
+            </nav>
+
+            <!-- Bottom Status Indicator -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span id="sidebar-cloud-status" class="font-medium flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Firestore Disconnected</span>
+                    <button onclick="switchTab('settings')" class="text-emerald-600 dark:text-emerald-400 hover:underline font-bold">Connect</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 h-16 flex items-center justify-between px-4 lg:px-8 no-print">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <h2 id="page-title" class="text-xl font-bold text-gray-800 dark:text-white">Dashboard Overview</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchTab('entry'); resetEntryForm();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 shadow-sm transition">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Add Client Record</span>
+                    </button>
+                    <div class="h-6 w-px bg-gray-200 dark:bg-gray-800"></div>
+                    <div class="text-xs text-right hidden sm:block">
+                        <p class="font-semibold text-gray-700 dark:text-gray-300" id="live-clock-time">--:--:--</p>
+                        <p class="text-gray-400" id="live-clock-date">--- --, ----</p>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+                <!-- TAB 1: DASHBOARD & FORECASTING -->
+                <section id="tab-dashboard" class="tab-content space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                        <div>
+                            <h3 class="font-bold text-gray-900 dark:text-white">Performance Overview & AI Forecasting</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Real-time metrics and predictive earnings projection.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-gray-500">Period:</label>
+                            <select id="dashboard-period-filter" onchange="renderDashboard()" class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-semibold rounded-lg px-3 py-2 outline-none">
+                                <option value="all">All Time</option>
+                                <option value="today" selected>Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Summary KPI Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
+                            <h4 class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1" id="dash-total-revenue">0 RWF</h4>
+                            <p class="text-[11px] text-gray-400 mt-1" id="dash-revenue-sub">0 sales</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Expenses</p>
+                            <h4 class="text-xl font-black text-red-500 mt-1" id="dash-total-expenses">0 RWF</h4>
+                            <p class="text-[11px] text-gray-400 mt-1">Operational outlays</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Net Profit</p>
+                            <h4 class="text-xl font-black text-blue-500 mt-1" id="dash-net-profit">0 RWF</h4>
+                            <p class="text-[11px] text-gray-400 mt-1">Revenue minus expenses</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Clients Served</p>
+                            <h4 class="text-xl font-black text-gray-900 dark:text-white mt-1" id="dash-total-clients">0</h4>
+                            <p class="text-[11px] text-emerald-500 mt-1">Active entries</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">MomoPay Share</p>
+                            <h4 class="text-xl font-black text-amber-500 mt-1" id="dash-momopay-total">0 RWF</h4>
+                            <p class="text-[11px] text-gray-400 mt-1" id="dash-momopay-pct">0%</p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Cash Share</p>
+                            <h4 class="text-xl font-black text-teal-500 mt-1" id="dash-cash-total">0 RWF</h4>
+                            <p class="text-[11px] text-gray-400 mt-1" id="dash-cash-pct">0%</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">Revenue Trend & Predictive Projection</h4>
+                                <span class="text-xs text-emerald-500 font-semibold">Active</span>
+                            </div>
+                            <div class="h-64 relative">
+                                <canvas id="chart-revenue-timeline"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">Peak Hours Heatmap</h4>
+                                <span class="text-xs text-gray-400">By Time of Day</span>
+                            </div>
+                            <div class="h-64 relative flex items-center justify-center">
+                                <canvas id="chart-peak-hours"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: CLIENT RECORDS & LEDGER -->
+                <section id="tab-records" class="tab-content hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                            <div class="md:col-span-4 relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                                <input type="text" id="search-input" oninput="renderRecordsTable()" placeholder="Search ID, Name, Phone, Service..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm focus:outline-none">
+                            </div>
+                            <div class="md:col-span-3">
+                                <select id="filter-service-type" onchange="renderRecordsTable()" class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-medium">
+                                    <option value="ALL">All Service Types</option>
+                                    <option value="IREMBO">IREMBO Only</option>
+                                    <option value="IT">IT Only</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <select id="filter-payment" onchange="renderRecordsTable()" class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-medium">
+                                    <option value="ALL">All Methods</option>
+                                    <option value="Cash">Cash Only</option>
+                                    <option value="MomoPay">MomoPay Only</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <select id="sort-select" onchange="renderRecordsTable()" class="w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-medium">
+                                    <option value="date-desc">Date (Newest First)</option>
+                                    <option value="date-asc">Date (Oldest First)</option>
+                                    <option value="amount-desc">Amount Paid (High to Low)</option>
+                                    <option value="name-asc">Client Name (A - Z)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100 dark:border-gray-800">
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-500 font-medium">Date Range:</span>
+                                <input type="date" id="filter-date-from" onchange="renderRecordsTable()" class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1">
+                                <span>to</span>
+                                <input type="date" id="filter-date-to" onchange="renderRecordsTable()" class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1">
+                                <button onclick="clearDateFilter()" class="text-red-500 hover:underline ml-1">Reset</button>
+                            </div>
+                            <div class="text-gray-500 font-medium">Showing <span id="records-count" class="font-bold text-emerald-600">0</span> records</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-800/60 text-gray-500 font-semibold text-xs uppercase border-b border-gray-200 dark:border-gray-800">
+                                        <th class="py-3.5 px-4">Client ID</th>
+                                        <th class="py-3.5 px-4">Date & Time</th>
+                                        <th class="py-3.5 px-4">Client Name</th>
+                                        <th class="py-3.5 px-4">Contact</th>
+                                        <th class="py-3.5 px-4">Service Type</th>
+                                        <th class="py-3.5 px-4">Description</th>
+                                        <th class="py-3.5 px-4">Amount</th>
+                                        <th class="py-3.5 px-4">Method</th>
+                                        <th class="py-3.5 px-4 text-center">Actions / View</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="records-table-body" class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB: BOOKING & ORDERING -->
+                <section id="tab-booking" class="tab-content hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Customer Booking & Product Orders</h3>
+                                <p class="text-xs text-gray-500">Manage incoming service appointments and product reservations.</p>
+                            </div>
+                            <button onclick="openBookingModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow transition">
+                                <i class="fa-solid fa-plus"></i> New Booking / Order
+                            </button>
+                        </div>
+
+                        <!-- Filters for Bookings -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
+                                <input type="text" id="booking-search-input" oninput="renderBookingTable()" placeholder="Search bookings by name, service..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs focus:outline-none">
+                            </div>
+                            <div>
+                                <select id="booking-filter-status" onchange="renderBookingTable()" class="w-full py-2 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-medium">
+                                    <option value="ALL">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select id="booking-filter-type" onchange="renderBookingTable()" class="w-full py-2 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-medium">
+                                    <option value="ALL">All Types (Service vs Product)</option>
+                                    <option value="Service Booking">Service Booking</option>
+                                    <option value="Product Order">Product Order</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Bookings Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-500 uppercase text-[10px]">
+                                        <th class="p-3">ID / Date</th>
+                                        <th class="p-3">Client Name & Phone</th>
+                                        <th class="p-3">Type</th>
+                                        <th class="p-3">Item / Service Requested</th>
+                                        <th class="p-3 text-center">Scheduled Date</th>
+                                        <th class="p-3 text-center">Status</th>
+                                        <th class="p-3 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="booking-table-body" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: NEW / EDIT CLIENT ENTRY FORM -->
+                <section id="tab-entry" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 lg:p-8 shadow-md">
+                        <div class="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-gray-800 mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white" id="entry-form-title">New Client Registration</h3>
+                                <p class="text-xs text-gray-500">Auto-generates unique transaction ID or updates selected record.</p>
+                            </div>
+                            <button onclick="resetEntryForm(); switchTab('records');" class="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                        </div>
+                        <form id="client-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                            <input type="hidden" id="editing-record-id" value="">
+                            <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs font-medium text-emerald-800 dark:text-emerald-300 uppercase">Generated Client ID</p>
+                                    <p class="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5" id="live-client-id">MDDR--</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Client Full Name *</label>
+                                    <input type="text" id="entry-name" required placeholder="e.g. Jean Paul" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Phone Number *</label>
+                                    <input type="tel" id="entry-phone" required placeholder="+250 788 000 000" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Service Type *</label>
+                                    <select id="entry-service-type" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-bold text-emerald-600">
+                                        <option value="IREMBO">IREMBO Service</option>
+                                        <option value="IT">IT Service</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Service Description / Details *</label>
+                                    <input type="text" id="entry-service" required placeholder="e.g. Passport Application / PC Repair" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Amount Paid *</label>
+                                    <input type="number" id="entry-amount" min="0" step="any" required placeholder="0" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Payment Method *</label>
+                                    <select id="entry-method" required class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm">
+                                        <option value="MomoPay">MomoPay (Mobile Money)</option>
+                                        <option value="Cash">Cash Payment</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Transaction Date & Time *</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <input type="date" id="entry-date" required onchange="updateGeneratedIDPreview()" class="px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs">
+                                        <input type="time" id="entry-time" required onchange="updateGeneratedIDPreview()" class="px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold uppercase text-gray-700 dark:text-gray-300 mb-2">Remarks</label>
+                                    <textarea id="entry-comment" rows="2" placeholder="Optional notes..." class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm"></textarea>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                                <button type="submit" id="form-submit-btn" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg transition">Save Client Record</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- TAB 4: CRM & CLIENT LOYALTY -->
+                <section id="tab-crm" class="tab-content hidden space-y-6 max-w-5xl mx-auto">
+                    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-800">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Client Relationship & Loyalty Directory</h3>
+                                <p class="text-xs text-gray-500">Automated client segmentation based on lifetime value and visit frequency.</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-500 uppercase">
+                                        <th class="p-3">Client Name</th>
+                                        <th class="p-3">Primary Phone</th>
+                                        <th class="p-3">Total Visits</th>
+                                        <th class="p-3 text-right">Lifetime Spend</th>
+                                        <th class="p-3 text-center">Loyalty Tier</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="crm-table-body" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: STOCK & INVENTORY MANAGEMENT -->
+                <section id="tab-inventory" class="tab-content hidden space-y-6 max-w-5xl mx-auto">
+                    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Inventory & Stock Control</h3>
+                                <p class="text-xs text-gray-500">Track stock levels with item type (Piece vs Package) and smart warning alerts.</p>
+                            </div>
+                            <div id="low-stock-alert-banner" class="hidden px-3 py-1.5 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold flex items-center gap-2 animate-pulse">
+                                <i class="fa-solid fa-triangle-exclamation"></i> <span id="low-stock-count-badge">0 items require attention!</span>
+                            </div>
+                        </div>
+
+                        <!-- Inventory Form -->
+                        <form id="inventory-form" onsubmit="handleInventorySubmit(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-3 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl items-center">
+                            <input type="hidden" id="editing-inv-id" value="">
+                            <input type="text" id="inv-item-name" placeholder="Item/Product Name" required class="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:col-span-2">
+                            <select id="inv-item-type" required class="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-medium">
+                                <option value="Piece(s)">Piece(s)</option>
+                                <option value="Package(s)">Package(s)</option>
+                            </select>
+                            <input type="number" id="inv-item-qty" placeholder="Initial Qty" min="0" required class="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-bold">
+                            <div class="flex gap-2">
+                                <button type="submit" id="inv-submit-btn" class="w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Add Item</button>
+                                <button type="button" id="inv-cancel-btn" onclick="resetInventoryForm()" class="hidden px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded-xl text-xs font-bold">Cancel</button>
+                            </div>
+                        </form>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-500 uppercase">
+                                        <th class="p-3">Product Name</th>
+                                        <th class="p-3 text-center">Type</th>
+                                        <th class="p-3 text-center">Units in Stock</th>
+                                        <th class="p-3 text-center">Quick Adjust (Sold / Bought)</th>
+                                        <th class="p-3 text-center">Status</th>
+                                        <th class="p-3 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 6: EXPENSES & PETTY CASH -->
+                <section id="tab-expenses" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-6">
+                        <div class="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-800">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Business Operational Expenses</h3>
+                                <p class="text-xs text-gray-500">Record petty cash outlays to compute true net profits.</p>
+                            </div>
+                        </div>
+                        <form id="expense-form" onsubmit="handleExpenseSubmit(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl">
+                            <input type="hidden" id="editing-expense-id" value="">
+                            <input type="date" id="expense-date" required class="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs">
+                            <input type="text" id="expense-title" placeholder="Expense description" required class="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs sm:col-span-2">
+                            <div class="flex gap-2">
+                                <input type="number" id="expense-amount" placeholder="Amount" min="0" required class="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-bold">
+                                <button type="submit" id="expense-submit-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold whitespace-nowrap">Add</button>
+                                <button type="button" id="expense-cancel-btn" onclick="resetExpenseForm()" class="hidden px-3 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded-xl text-xs font-bold whitespace-nowrap">Cancel</button>
+                            </div>
+                        </form>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-500 uppercase">
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Description</th>
+                                        <th class="p-3 text-right">Amount</th>
+                                        <th class="p-3 text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-table-body" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 7: TAX & PROFIT ANALYTICS -->
+                <section id="tab-tax" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Tax Liability & Corporate Financial Analysis</h3>
+                            <p class="text-xs text-gray-500">Estimated tax reserves and gross vs. net financial standing.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                <p class="text-xs uppercase text-gray-400 font-bold">Gross Revenue</p>
+                                <p class="text-lg font-black text-emerald-600 mt-1" id="tax-gross-rev">0 RWF</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                <p class="text-xs uppercase text-gray-400 font-bold">Estimated Tax Reserve (15% Net)</p>
+                                <p class="text-lg font-black text-amber-500 mt-1" id="tax-estimated-due">0 RWF</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                <p class="text-xs uppercase text-gray-400 font-bold">Post-Tax Net Income</p>
+                                <p class="text-lg font-black text-blue-500 mt-1" id="tax-post-net">0 RWF</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 8: EXPORT PDF & STATEMENTS -->
+                <section id="tab-reports" class="tab-content hidden space-y-6">
+                    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4 no-print">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Official Financial Report Generator</h3>
+                                <p class="text-xs text-gray-500">Customize statement parameters and export high-resolution formatted PDF reports.</p>
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button onclick="exportReportToPDF()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold text-white shadow transition flex items-center gap-2 whitespace-nowrap">
+                                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                                </button>
+                                <button onclick="window.print()" class="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow transition">
+                                    <i class="fa-solid fa-print"></i> Print Statement
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Report Customization Toolbar -->
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Timeframe Preset</label>
+                                <select id="report-preset" onchange="applyReportPreset(this.value)" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs font-medium">
+                                    <option value="all">All Time Records</option>
+                                    <option value="today" selected>Today Only</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="custom">Custom Date Range</option>
+                                </select>
+                            </div>
+                            <div id="report-custom-date-container" class="sm:col-span-1 hidden flex items-center gap-2">
+                                <div class="w-1/2">
+                                    <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">From Date</label>
+                                    <input type="date" id="report-date-from" onchange="applyReportPreset('custom')" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-2 text-xs">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">To Date</label>
+                                    <input type="date" id="report-date-to" onchange="applyReportPreset('custom')" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-2 py-2 text-xs">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Custom Report Subtitle / Memo</label>
+                                <input type="text" id="report-custom-memo" oninput="renderReportPreview()" value="Official Operations & Financial Statement" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-gray-500 mb-1">Sign-off / Prepared By</label>
+                                <input type="text" id="report-custom-author" oninput="renderReportPreview()" value="Muhikira Darcie (Enterprise Admin)" class="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clean White Background Report Preview Document -->
+                    <div class="flex justify-center">
+                        <div id="pdf-report-document" class="w-full max-w-[210mm] min-h-[297mm] bg-white text-gray-900 p-8 sm:p-12 rounded-2xl border border-gray-200 shadow-xl space-y-6">
+                            <div class="flex justify-between items-start border-b-2 border-emerald-500 pb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow">
+                                        MD
+                                    </div>
+                                    <div>
+                                        <h1 class="text-2xl font-black tracking-tight text-gray-900">MUHIKIRA DARCIE</h1>
+                                        <p class="text-xs font-bold text-emerald-600 uppercase" id="pdf-header-subtitle">Official Operations & Financial Statement</p>
+                                    </div>
+                                </div>
+                                <div class="text-right text-xs text-gray-500 space-y-1">
+                                    <p>Generated: <span id="pdf-generated-at" class="text-gray-900 font-medium">--</span></p>
+                                    <p>Status: <span class="text-emerald-600 font-bold">Verified & Active</span></p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-5 rounded-xl border border-gray-200 text-center">
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Total Revenue</p>
+                                    <p class="text-lg font-black text-emerald-600 mt-1" id="pdf-total-rev">0 RWF</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Total Expenses</p>
+                                    <p class="text-lg font-black text-rose-600 mt-1" id="pdf-total-exp">0 RWF</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Net Profit</p>
+                                    <p class="text-lg font-black text-blue-600 mt-1" id="pdf-net-prof">0 RWF</p>
+                                </div>
+                            </div>
+
+                            <!-- TWO COLUMN REPORT SECTION FOR IREMBO VS IT -->
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-columns text-emerald-600"></i> Client Records by Service Type (IREMBO vs IT)
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Column 1: IREMBO -->
+                                    <div class="border border-emerald-200 rounded-xl p-4 bg-emerald-50/20 space-y-3">
+                                        <div class="flex justify-between items-center border-b border-emerald-200 pb-2">
+                                            <h5 class="font-black text-xs text-emerald-800 uppercase tracking-wide"><i class="fa-solid fa-file-shield mr-1"></i> IREMBO Services</h5>
+                                            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full" id="pdf-irembo-total">0 RWF</span>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-left border-collapse text-[11px]">
+                                                <thead>
+                                                    <tr class="text-gray-500 uppercase text-[9px] border-b border-gray-200">
+                                                        <th class="py-1.5 px-2">Client Name</th>
+                                                        <th class="py-1.5 px-2">Service</th>
+                                                        <th class="py-1.5 px-2 text-right">Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pdf-irembo-tbody" class="divide-y divide-gray-100 text-gray-800"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Column 2: IT -->
+                                    <div class="border border-blue-200 rounded-xl p-4 bg-blue-50/20 space-y-3">
+                                        <div class="flex justify-between items-center border-b border-blue-200 pb-2">
+                                            <h5 class="font-black text-xs text-blue-800 uppercase tracking-wide"><i class="fa-solid fa-laptop-code mr-1"></i> IT Services</h5>
+                                            <span class="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full" id="pdf-it-total">0 RWF</span>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-left border-collapse text-[11px]">
+                                                <thead>
+                                                    <tr class="text-gray-500 uppercase text-[9px] border-b border-gray-200">
+                                                        <th class="py-1.5 px-2">Client Name</th>
+                                                        <th class="py-1.5 px-2">Service</th>
+                                                        <th class="py-1.5 px-2 text-right">Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pdf-it-tbody" class="divide-y divide-gray-100 text-gray-800"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-gray-500 gap-2">
+                                <p>Prepared by: <span id="pdf-footer-author" class="text-gray-900 font-semibold">Muhikira Darcie</span></p>
+                                <p class="font-mono text-[10px]">MDDR Enterprise Suite v2.8 • Firestore Cloud Ledger</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 9: SYSTEM AUDIT TRAIL LOG -->
+                <section id="tab-audit" class="tab-content hidden space-y-6 max-w-5xl mx-auto">
+                    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">System Audit Trail & Security Log</h3>
+                                <p class="text-xs text-gray-500">Comprehensive chronological tracking of administrative actions and system events.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="exportAuditCSV()" class="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                                </button>
+                                <button onclick="clearAuditLog()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-trash-can"></i> Clear Log
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Audit KPI Summary Cards -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <p class="text-[11px] font-bold uppercase text-gray-400">Total Audit Entries</p>
+                                <p class="text-xl font-black text-gray-900 dark:text-white mt-1" id="audit-total-count">0</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <p class="text-[11px] font-bold uppercase text-gray-400">Actions Today</p>
+                                <p class="text-xl font-black text-emerald-600 mt-1" id="audit-today-count">0</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <p class="text-[11px] font-bold uppercase text-gray-400">Deletions / Security Events</p>
+                                <p class="text-xl font-black text-red-500 mt-1" id="audit-danger-count">0</p>
+                            </div>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400 text-xs"></i>
+                                <input type="text" id="audit-search-input" oninput="renderAuditLog()" placeholder="Search audit actions, roles, timestamps..." class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs focus:outline-none">
+                            </div>
+                            <div>
+                                <select id="audit-filter-type" onchange="renderAuditLog()" class="w-full py-2 px-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-xs font-medium">
+                                    <option value="ALL">All Audit Categories</option>
+                                    <option value="Added">Creation / Additions</option>
+                                    <option value="Updated">Modifications / Updates</option>
+                                    <option value="Deleted">Deletions / Removals</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Audit Log Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-500 uppercase text-[10px]">
+                                        <th class="p-3">Timestamp</th>
+                                        <th class="p-3">User Role</th>
+                                        <th class="p-3">Action Description</th>
+                                        <th class="p-3 text-center">Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-table-body" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 10: APP SETTINGS -->
+                <section id="tab-settings" class="tab-content hidden max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 lg:p-8 shadow-sm space-y-8">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Application Settings & Configuration</h3>
+                            <p class="text-xs text-gray-500">Manage currency preferences, visual appearance, font size, and Firestore database connection.</p>
+                        </div>
+
+                        <!-- 1. Currency Setting -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-coins text-emerald-500"></i> Default Currency
+                                </h4>
+                                <p class="text-xs text-gray-500">Choose the primary currency for sales, revenue reports, and ledger totals.</p>
+                            </div>
+                            <select id="settings-currency-select" onchange="changeCurrency(this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-bold rounded-xl px-4 py-2.5 focus:outline-none">
+                                <option value="RWF">RWF (Rwandan Franc)</option>
+                                <option value="USD">USD ($ US Dollar)</option>
+                            </select>
+                        </div>
+
+                        <!-- 2. App Theme Setting -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-moon text-indigo-500"></i> App Theme Appearance
+                                </h4>
+                                <p class="text-xs text-gray-500">Switch between dark mode and light mode interface.</p>
+                            </div>
+                            <button onclick="toggleTheme()" class="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white text-xs font-bold rounded-xl flex items-center gap-2 transition">
+                                <i class="fa-solid fa-circle-half-stroke"></i> Toggle Dark / Light Theme
+                            </button>
+                        </div>
+
+                        <!-- 3. Font Size Setting -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-font text-blue-500"></i> Application Font Size
+                                </h4>
+                                <p class="text-xs text-gray-500">Adjust the readability scale of the user interface text.</p>
+                            </div>
+                            <select id="settings-fontsize-select" onchange="changeFontSize(this.value)" class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-bold rounded-xl px-4 py-2.5 focus:outline-none">
+                                <option value="sm">Compact (Small)</option>
+                                <option value="md" selected>Default (Normal)</option>
+                                <option value="lg">Comfortable (Large)</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. Firebase Cloud Configuration -->
+                        <div class="p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-fire text-amber-500"></i> Firebase Firestore Database
+                                    </h4>
+                                    <p class="text-xs text-gray-500">Connect to Firestore as the sole backend data store.</p>
+                                </div>
+                                <span id="settings-firebase-badge" class="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/30">Disconnected</span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-1">Firebase Configuration JSON:</label>
+                                <textarea id="firebase-json-input" rows="6" placeholder='{
+  "apiKey": "...",
+  "authDomain": "...",
+  "projectId": "...",
+  "storageBucket": "...",
+  "messagingSenderId": "...",
+  "appId": "..."
+}' class="w-full p-3 font-mono text-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl focus:outline-none focus:border-amber-500"></textarea>
+                            </div>
+                            <div class="flex justify-end gap-3">
+                                <button onclick="saveAndConnectFirebase()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow">Save & Connect Firestore</button>
+                            </div>
+                        </div>
+
+                        <!-- 5. Backup & Restore Data (Cloud JSON) -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-database text-blue-500"></i> Export / Import Firestore Backup
+                                </h4>
+                                <p class="text-xs text-gray-500">Export your cloud database as JSON or import data directly into Firestore.</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="exportJSONBackup()" class="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-800 dark:text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-download"></i> Export JSON
+                                </button>
+                                <button onclick="document.getElementById('import-file-input').click()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-upload"></i> Import JSON
+                                </button>
+                                <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importJSONBackup(event)">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- NEW / EDIT BOOKING & ORDER MODAL -->
+    <div id="booking-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-800">
+                <h3 class="font-bold text-gray-900 dark:text-white text-base" id="booking-modal-title">New Booking / Product Order</h3>
+                <button onclick="closeBookingModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="editing-booking-id" value="">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Client Name *</label>
+                        <input type="text" id="booking-name" required placeholder="e.g. Jean Paul" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Phone Number *</label>
+                        <input type="tel" id="booking-phone" required placeholder="+250 788 000 000" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Booking Type *</label>
+                        <select id="booking-type" required class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                            <option value="Service Booking">Service Booking</option>
+                            <option value="Product Order">Product Order</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Status *</label>
+                        <select id="booking-status" required class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Service or Item Ordered *</label>
+                    <input type="text" id="booking-item" required placeholder="e.g. Diagnostic Scan / 2x Batteries" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Scheduled Date *</label>
+                        <input type="date" id="booking-date" required class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Estimated Amount</label>
+                        <input type="number" id="booking-amount" min="0" placeholder="0" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold uppercase text-gray-700 dark:text-gray-300 mb-1">Notes / Special Instructions</label>
+                    <textarea id="booking-notes" rows="2" placeholder="Optional details..." class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeBookingModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow">Save Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CLIENT LEDGER / STATEMENT MODAL -->
+    <div id="client-ledger-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-800">
+                <h3 class="font-bold text-gray-900 dark:text-white text-base" id="ledger-client-name">Client Ledger</h3>
+                <button onclick="closeLedgerModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl text-xs">
+                <div><span class="text-gray-400">Total Visits:</span> <span class="font-bold" id="ledger-visits">0</span></div>
+                <div><span class="text-gray-400">Lifetime Spend:</span> <span class="font-bold text-emerald-600" id="ledger-spend">0 RWF</span></div>
+            </div>
+            <div class="max-h-60 overflow-y-auto space-y-2" id="ledger-history-list"></div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeLedgerModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-xl text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW SINGLE CLIENT RECORD MODAL -->
+    <div id="view-record-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden p-6 space-y-5">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-800">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base">Client Record Details</h3>
+                </div>
+                <button onclick="closeViewRecordModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl flex justify-between items-center">
+                    <span class="text-gray-400 font-medium">Transaction ID</span>
+                    <span id="view-modal-id" class="font-mono font-bold text-emerald-600">--</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Client Name</span>
+                        <span id="view-modal-name" class="font-bold text-gray-900 dark:text-white text-sm mt-0.5 block">--</span>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Contact Phone</span>
+                        <span id="view-modal-phone" class="font-semibold text-gray-700 dark:text-gray-300 mt-0.5 block">--</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Service Type</span>
+                        <span id="view-modal-service-type" class="font-bold text-emerald-600 mt-0.5 block">--</span>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Amount Paid</span>
+                        <span id="view-modal-amount" class="font-black text-emerald-600 text-sm mt-0.5 block">--</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                    <span class="text-gray-400 block font-medium">Service Description</span>
+                    <span id="view-modal-service" class="font-semibold text-gray-700 dark:text-gray-300 mt-0.5 block">--</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Payment Method</span>
+                        <span id="view-modal-method" class="font-bold mt-0.5 block">--</span>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                        <span class="text-gray-400 block font-medium">Date & Time</span>
+                        <span id="view-modal-datetime" class="font-medium text-gray-700 dark:text-gray-300 mt-0.5 block">--</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl">
+                    <span class="text-gray-400 block font-medium">Remarks / Notes</span>
+                    <span id="view-modal-comment" class="text-gray-600 dark:text-gray-400 mt-0.5 block italic">--</span>
+                </div>
+            </div>
+            <div class="flex justify-end items-center pt-2 border-t border-gray-200 dark:border-gray-800">
+                <button onclick="closeViewRecordModal()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-xl text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC (FIRESTORE ONLY) -->
+    <script>
+        let state = {
+            currency: 'RWF',
+            fontSize: 'md',
+            records: [],
+            expenses: [],
+            inventory: [],
+            bookings: [],
+            auditLog: []
+        };
+
+        let revenueChart = null;
+        let peakChart = null;
+        let db = null;
+        let unsubscribeSnapshot = null;
+
+        window.onload = function() {
+            initLiveClock();
+            setDefaultDateTime();
+            updateGeneratedIDPreview();
+            
+            // Check if Firebase config is saved in localStorage for reconnection
+            const savedConfig = localStorage.getItem('mddr_firebase_config_v1');
+            if(savedConfig) {
+                try {
+                    const configObj = JSON.parse(savedConfig);
+                    const jsonInput = document.getElementById('firebase-json-input');
+                    if(jsonInput) jsonInput.value = JSON.stringify(configObj, null, 2);
+                    connectToFirebase(configObj);
+                } catch(e) { console.error("Invalid stored firebase config"); }
+            }
+            switchTab('dashboard');
+        };
+
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if(!container) return;
+            const toast = document.createElement('div');
+            const bgClass = type === 'alert' ? 'bg-red-600 text-white' : type === 'success' ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-white';
+            const icon = type === 'alert' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info';
+            
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold ${bgClass} transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // --- FIREBASE CONNECTION & FIRESTORE SYNC ---
+        function connectToFirebase(configObj) {
+            try {
+                if(firebase.apps.length > 0) {
+                    firebase.app().delete().then(() => initNewFirebaseApp(configObj));
+                } else {
+                    initNewFirebaseApp(configObj);
+                }
+            } catch(err) {
+                console.error(err);
+                alert("Firebase Error: Could not initialize Firebase with provided credentials.");
+            }
+        }
+
+        function initNewFirebaseApp(configObj) {
+            try {
+                firebase.initializeApp(configObj);
+                db = firebase.firestore();
+
+                const badge = document.getElementById('settings-firebase-badge');
+                if(badge) {
+                    badge.textContent = "Connected to Firestore";
+                    badge.className = "px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/30";
+                }
+                const sidebarStatus = document.getElementById('sidebar-cloud-status');
+                if(sidebarStatus) sidebarStatus.innerHTML = '<i class="fa-solid fa-cloud text-emerald-500"></i> Firestore Synced';
+
+                if(unsubscribeSnapshot) unsubscribeSnapshot();
+
+                const docRef = db.collection("enterprises").doc("muhikira_darcie_main");
+                unsubscribeSnapshot = docRef.onSnapshot((doc) => {
+                    if(doc.exists) {
+                        const data = doc.data();
+                        state = {
+                            currency: data.currency || 'RWF',
+                            fontSize: data.fontSize || 'md',
+                            records: data.records || [],
+                            expenses: data.expenses || [],
+                            inventory: data.inventory || [],
+                            bookings: data.bookings || [],
+                            auditLog: data.auditLog || []
+                        };
+                        refreshAllViews();
+                    } else {
+                        // Seed document if empty in Firestore
+                        docRef.set(state);
+                    }
+                }, (error) => {
+                    console.error("Firestore snapshot error:", error);
+                    showToast("Firestore Connection Error.", "alert");
+                });
+            } catch(err) {
+                console.error("Firebase startup error:", err);
+            }
+        }
+
+        function saveAndConnectFirebase() {
+            const jsonInput = document.getElementById('firebase-json-input');
+            if(!jsonInput) return;
+            const val = jsonInput.value.trim();
+            if(!val) {
+                alert('Please paste a valid Firebase JSON configuration.');
+                return;
+            }
+            try {
+                const configObj = JSON.parse(val);
+                localStorage.setItem('mddr_firebase_config_v1', JSON.stringify(configObj));
+                connectToFirebase(configObj);
+                showToast('Connected to Firestore successfully!', 'success');
+            } catch(err) {
+                alert('Invalid JSON format. Please check your syntax.');
+            }
+        }
+
+        // --- FIRESTORE PERSISTENCE WRAPPER ---
+        function saveState() {
+            if (db) {
+                db.collection("enterprises").doc("muhikira_darcie_main").set(state)
+                  .catch(err => console.error("Firestore save error:", err));
+            } else {
+                showToast("Warning: Not connected to Firestore. Changes will not be saved permanently until connected.", "alert");
+            }
+        }
+
+        function refreshAllViews() {
+            renderDashboard();
+            renderRecordsTable();
+            renderBookingTable();
+            renderCRMTable();
+            renderInventoryTable();
+            renderExpensesTable();
+            renderTaxAnalytics();
+            renderAuditLog();
+            renderReportPreview();
+            applyFontSize(state.fontSize || 'md');
+
+            const currSelect = document.getElementById('settings-currency-select');
+            if(currSelect) currSelect.value = state.currency;
+
+            const fontSelect = document.getElementById('settings-fontsize-select');
+            if(fontSelect) fontSelect.value = state.fontSize || 'md';
+        }
+
+        function logAudit(action) {
+            if(!state.auditLog) state.auditLog = [];
+            state.auditLog.unshift({
+                time: new Date().toLocaleString(),
+                role: 'Admin',
+                action: action
+            });
+            saveState();
+        }
+
+        function initLiveClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('live-clock-time').textContent = now.toLocaleTimeString();
+                document.getElementById('live-clock-date').textContent = now.toLocaleDateString(undefined, {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+            }, 1000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-emerald-500/10', 'text-emerald-600', 'dark:text-emerald-400'));
+            
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if(targetTab) targetTab.classList.remove('hidden');
+
+            const targetNav = document.getElementById(`nav-${tabId}`);
+            if(targetNav) targetNav.classList.add('bg-emerald-500/10', 'text-emerald-600', 'dark:text-emerald-400');
+            
+            const titles = {
+                dashboard: "Dashboard & Forecasting",
+                records: "Client Records & Ledger Directory",
+                booking: "Booking & Product Ordering",
+                entry: document.getElementById('editing-record-id').value ? "Edit Client Record" : "New Client Transaction Entry",
+                crm: "CRM & Client Loyalty Directory",
+                inventory: "Stock & Inventory Management",
+                expenses: "Operational Expenses & Net Profit",
+                tax: "Tax & Financial Analytics",
+                reports: "Official Financial Report Generator",
+                audit: "System Audit Trail & Security Log",
+                settings: "Application Settings & Configuration"
+            };
+            document.getElementById('page-title').textContent = titles[tabId] || "Muhikira Darcie";
+
+            refreshAllViews();
+
+            if(window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        function changeCurrency(val) {
+            state.currency = val;
+            saveState();
+            refreshAllViews();
+        }
+
+        function changeFontSize(size) {
+            state.fontSize = size;
+            saveState();
+            applyFontSize(size);
+            showToast(`Font size updated successfully.`, 'success');
+        }
+
+        function applyFontSize(size) {
+            const htmlEl = document.documentElement;
+            htmlEl.classList.remove('text-size-sm', 'text-size-md', 'text-size-lg');
+            htmlEl.classList.add(`text-size-${size}`);
+        }
+
+        function formatMoney(amount) {
+            if(state.currency === 'USD') {
+                return '$' + (amount / 1350).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+            }
+            return amount.toLocaleString('en-US') + ' RWF';
+        }
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            document.getElementById('entry-date').value = todayStr;
+            document.getElementById('entry-time').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            document.getElementById('expense-date').value = todayStr;
+            if(document.getElementById('booking-date')) {
+                document.getElementById('booking-date').value = todayStr;
+            }
+            if(document.getElementById('report-date-from')) {
+                document.getElementById('report-date-from').value = todayStr;
+            }
+            if(document.getElementById('report-date-to')) {
+                document.getElementById('report-date-to').value = todayStr;
+            }
+        }
+
+        function resetEntryForm() {
+            document.getElementById('editing-record-id').value = '';
+            document.getElementById('client-form').reset();
+            document.getElementById('entry-form-title').textContent = 'New Client Registration';
+            document.getElementById('form-submit-btn').textContent = 'Save Client Record';
+            setDefaultDateTime();
+            updateGeneratedIDPreview();
+        }
+
+        function updateGeneratedIDPreview() {
+            if(document.getElementById('editing-record-id').value) return; 
+            const date = document.getElementById('entry-date').value.split('-').reverse().join('');
+            const time = document.getElementById('entry-time').value.replace(':', '');
+            document.getElementById('live-client-id').textContent = `MDDR${date}${time}`;
+        }
+
+        // --- BOOKING & ORDERING LOGIC ---
+        function openBookingModal() {
+            document.getElementById('editing-booking-id').value = '';
+            document.getElementById('booking-form').reset();
+            document.getElementById('booking-modal-title').textContent = 'New Booking / Product Order';
+            setDefaultDateTime();
+            document.getElementById('booking-modal').classList.remove('hidden');
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+        }
+
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editing-booking-id').value;
+            const name = document.getElementById('booking-name').value.trim();
+            const phone = document.getElementById('booking-phone').value.trim();
+            const type = document.getElementById('booking-type').value;
+            const item = document.getElementById('booking-item').value.trim();
+            const date = document.getElementById('booking-date').value;
+            const status = document.getElementById('booking-status').value;
+            const amount = parseFloat(document.getElementById('booking-amount').value) || 0;
+            const notes = document.getElementById('booking-notes').value.trim();
+
+            if(!state.bookings) state.bookings = [];
+
+            if(editingId) {
+                const idx = state.bookings.findIndex(b => b.id === editingId);
+                if(idx !== -1) {
+                    state.bookings[idx] = { ...state.bookings[idx], name, phone, type, item, date, status, amount, notes };
+                    logAudit(`Updated booking/order ${editingId} for ${name}`);
+                    showToast(`Updated booking ${editingId}`, 'success');
+                }
+            } else {
+                const id = 'BK-' + Date.now().toString().slice(-6);
+                const newBooking = { id, name, phone, type, item, date, status, amount, notes, created: new Date().toLocaleDateString() };
+                state.bookings.unshift(newBooking);
+                logAudit(`Created new booking/order ${id} for ${name}`);
+                showToast(`New booking ${id} created successfully!`, 'success');
+            }
+
+            saveState();
+            closeBookingModal();
+            renderBookingTable();
+        }
+
+        function editBooking(id) {
+            const b = (state.bookings || []).find(item => item.id === id);
+            if(!b) return;
+
+            document.getElementById('editing-booking-id').value = b.id;
+            document.getElementById('booking-name').value = b.name;
+            document.getElementById('booking-phone').value = b.phone;
+            document.getElementById('booking-type').value = b.type;
+            document.getElementById('booking-status').value = b.status;
+            document.getElementById('booking-item').value = b.item;
+            document.getElementById('booking-date').value = b.date;
+            document.getElementById('booking-amount').value = b.amount;
+            document.getElementById('booking-notes').value = b.notes || '';
+
+            document.getElementById('booking-modal-title').textContent = `Edit Booking (${b.id})`;
+            document.getElementById('booking-modal').classList.remove('hidden');
+        }
+
+        function deleteBooking(id) {
+            if(confirm(`Are you sure you want to delete booking ${id}?`)) {
+                state.bookings = (state.bookings || []).filter(b => b.id !== id);
+                saveState();
+                renderBookingTable();
+                logAudit(`Deleted booking/order ${id}`);
+                showToast(`Deleted booking ${id}`, 'info');
+            }
+        }
+
+        function renderBookingTable() {
+            const tbody = document.getElementById('booking-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('booking-search-input')?.value || '').toLowerCase();
+            const statusFilter = document.getElementById('booking-filter-status')?.value || 'ALL';
+            const typeFilter = document.getElementById('booking-filter-type')?.value || 'ALL';
+
+            let filtered = (state.bookings || []).filter(b => {
+                const matchSearch = b.id.toLowerCase().includes(searchTerm) ||
+                                    b.name.toLowerCase().includes(searchTerm) ||
+                                    b.phone.toLowerCase().includes(searchTerm) ||
+                                    b.item.toLowerCase().includes(searchTerm);
+                const matchStatus = statusFilter === 'ALL' || b.status === statusFilter;
+                const matchType = typeFilter === 'ALL' || b.type === typeFilter;
+                return matchSearch && matchStatus && matchType;
+            });
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No bookings or orders found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(b => {
+                let statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-100 text-yellow-800">Pending</span>';
+                if(b.status === 'Confirmed') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-800">Confirmed</span>';
+                if(b.status === 'Completed') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">Completed</span>';
+                if(b.status === 'Cancelled') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-800">Cancelled</span>';
+
+                const typeBadge = b.type === 'Service Booking' 
+                    ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Service</span>'
+                    : '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Product Order</span>';
+
+                const waText = encodeURIComponent(`Hello ${b.name}, this is Muhikira Darcie. Regarding your ${b.type.toLowerCase()} for "${b.item}" scheduled on ${b.date}, status is currently: ${b.status}. Thank you!`);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
+                        <td class="p-3 font-mono font-bold text-emerald-600">${b.id}<br><span class="text-[10px] text-gray-400 font-normal">Created: ${b.created || '--'}</span></td>
+                        <td class="p-3 font-bold">${escapeHtml(b.name)}<br><span class="font-normal text-gray-500 text-[11px]">${escapeHtml(b.phone)}</span></td>
+                        <td class="p-3">${typeBadge}</td>
+                        <td class="p-3 font-semibold">${escapeHtml(b.item)}<br><span class="font-normal text-gray-400 text-[11px]">${b.amount ? formatMoney(b.amount) : ''}</span></td>
+                        <td class="p-3 text-center font-medium">${b.date}</td>
+                        <td class="p-3 text-center">${statusBadge}</td>
+                        <td class="p-3 text-center flex justify-center gap-1.5">
+                            <button onclick="editBooking('${b.id}')" class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Edit Booking"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <a href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}?text=${waText}" target="_blank" class="p-1.5 bg-emerald-500 text-white rounded hover:bg-emerald-600" title="Send WhatsApp Confirmation"><i class="fa-brands fa-whatsapp"></i></a>
+                            <button onclick="deleteBooking('${b.id}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- STANDARD APP FUNCTIONS ---
+        function editRecord(id) {
+            const record = (state.records || []).find(r => r.id === id);
+            if(!record) return;
+
+            document.getElementById('editing-record-id').value = record.id;
+            document.getElementById('entry-name').value = record.name;
+            document.getElementById('entry-phone').value = record.phone;
+            document.getElementById('entry-service-type').value = record.serviceType || 'IREMBO';
+            document.getElementById('entry-service').value = record.service;
+            document.getElementById('entry-amount').value = record.amount;
+            document.getElementById('entry-method').value = record.method;
+            document.getElementById('entry-date').value = record.date;
+            document.getElementById('entry-time').value = record.time;
+            document.getElementById('entry-comment').value = record.comment || '';
+
+            document.getElementById('live-client-id').textContent = record.id;
+            document.getElementById('entry-form-title').textContent = `Edit Client Record (${record.id})`;
+            document.getElementById('form-submit-btn').textContent = 'Update Record';
+
+            switchTab('entry');
+        }
+
+        function viewRecord(id) {
+            const record = (state.records || []).find(r => r.id === id);
+            if(!record) return;
+
+            document.getElementById('view-modal-id').textContent = record.id;
+            document.getElementById('view-modal-name').textContent = record.name;
+            document.getElementById('view-modal-phone').textContent = record.phone;
+            document.getElementById('view-modal-service-type').textContent = record.serviceType || 'IREMBO';
+            document.getElementById('view-modal-service').textContent = record.service;
+            document.getElementById('view-modal-amount').textContent = formatMoney(record.amount);
+            
+            const methodEl = document.getElementById('view-modal-method');
+            methodEl.textContent = record.method;
+            methodEl.className = `font-bold mt-0.5 block ${record.method === 'MomoPay' ? 'text-amber-500' : 'text-teal-500'}`;
+
+            document.getElementById('view-modal-datetime').textContent = `${record.date} at ${record.time}`;
+            document.getElementById('view-modal-comment').textContent = record.comment ? record.comment : 'No additional remarks provided.';
+
+            document.getElementById('view-record-modal').classList.remove('hidden');
+        }
+
+        function closeViewRecordModal() {
+            document.getElementById('view-record-modal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editing-record-id').value;
+            const date = document.getElementById('entry-date').value;
+            const time = document.getElementById('entry-time').value;
+
+            if(!state.records) state.records = [];
+
+            if (editingId) {
+                const idx = state.records.findIndex(r => r.id === editingId);
+                if (idx !== -1) {
+                    state.records[idx] = {
+                        ...state.records[idx],
+                        name: document.getElementById('entry-name').value.trim(),
+                        phone: document.getElementById('entry-phone').value.trim(),
+                        serviceType: document.getElementById('entry-service-type').value,
+                        service: document.getElementById('entry-service').value.trim(),
+                        amount: parseFloat(document.getElementById('entry-amount').value) || 0,
+                        method: document.getElementById('entry-method').value,
+                        date,
+                        time,
+                        comment: document.getElementById('entry-comment').value.trim()
+                    };
+                    logAudit(`Updated client record ${editingId}`);
+                }
+            } else {
+                const id = `MDDR${date.split('-').reverse().join('')}${time.replace(':','')}`;
+                const record = {
+                    id,
+                    name: document.getElementById('entry-name').value.trim(),
+                    phone: document.getElementById('entry-phone').value.trim(),
+                    serviceType: document.getElementById('entry-service-type').value,
+                    service: document.getElementById('entry-service').value.trim(),
+                    amount: parseFloat(document.getElementById('entry-amount').value) || 0,
+                    method: document.getElementById('entry-method').value,
+                    date,
+                    time,
+                    comment: document.getElementById('entry-comment').value.trim()
+                };
+                state.records.unshift(record);
+                logAudit(`Added client record ${id} for ${record.name} (${record.serviceType})`);
+            }
+
+            saveState();
+            resetEntryForm();
+            refreshAllViews();
+            switchTab('records');
+        }
+
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editing-expense-id').value;
+            const date = document.getElementById('expense-date').value;
+            const title = document.getElementById('expense-title').value.trim();
+            const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
+
+            if(!state.expenses) state.expenses = [];
+
+            if (editingId) {
+                const idx = state.expenses.findIndex(ex => ex.id === editingId);
+                if (idx !== -1) {
+                    state.expenses[idx] = { ...state.expenses[idx], date, title, amount };
+                    logAudit(`Updated expense: ${title} (${amount})`);
+                }
+            } else {
+                const exp = {
+                    id: 'EXP-' + Date.now().toString().slice(-6),
+                    date,
+                    title,
+                    amount
+                };
+                state.expenses.unshift(exp);
+                logAudit(`Added expense: ${exp.title} (${exp.amount})`);
+            }
+
+            saveState();
+            renderExpensesTable();
+            renderDashboard();
+            renderTaxAnalytics();
+            resetExpenseForm();
+        }
+
+        function editExpense(idx) {
+            const ex = (state.expenses || [])[idx];
+            if(!ex) return;
+            document.getElementById('editing-expense-id').value = ex.id;
+            document.getElementById('expense-date').value = ex.date;
+            document.getElementById('expense-title').value = ex.title;
+            document.getElementById('expense-amount').value = ex.amount;
+            document.getElementById('expense-submit-btn').textContent = 'Update';
+            document.getElementById('expense-cancel-btn').classList.remove('hidden');
+        }
+
+        function resetExpenseForm() {
+            document.getElementById('expense-form').reset();
+            document.getElementById('editing-expense-id').value = '';
+            document.getElementById('expense-submit-btn').textContent = 'Add';
+            document.getElementById('expense-cancel-btn').classList.add('hidden');
+            setDefaultDateTime();
+        }
+
+        // --- INVENTORY MANAGEMENT ---
+        function handleInventorySubmit(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editing-inv-id').value;
+            const name = document.getElementById('inv-item-name').value.trim();
+            const type = document.getElementById('inv-item-type').value;
+            const qty = parseInt(document.getElementById('inv-item-qty').value) || 0;
+
+            if(!state.inventory) state.inventory = [];
+
+            if (editingId) {
+                const idx = state.inventory.findIndex(item => item.id === editingId);
+                if (idx !== -1) {
+                    state.inventory[idx] = { ...state.inventory[idx], name, type, qty };
+                    logAudit(`Updated inventory item: ${name} (${type}, ${qty} units)`);
+                    showToast(`Updated ${name} successfully.`, 'success');
+                }
+            } else {
+                const inv = {
+                    id: 'INV-' + Date.now().toString().slice(-6),
+                    name,
+                    type,
+                    qty
+                };
+                state.inventory.unshift(inv);
+                logAudit(`Added inventory item: ${inv.name} (${type}, ${inv.qty} units)`);
+                showToast(`Added new item: ${name} (${type})`, 'success');
+            }
+
+            saveState();
+            renderInventoryTable();
+            resetInventoryForm();
+        }
+
+        function adjustInventoryQty(idx, amount) {
+            const item = (state.inventory || [])[idx];
+            if (!item) return;
+
+            const newQty = item.qty + amount;
+            if (newQty < 0) {
+                showToast(`Cannot reduce stock below 0 for ${item.name}!`, 'alert');
+                return;
+            }
+
+            item.qty = newQty;
+            const itemType = item.type || 'Piece(s)';
+            const actionType = amount > 0 ? 'Bought (+)' : 'Sold (-)';
+            logAudit(`Adjusted ${item.name} (${itemType}): ${actionType} ${Math.abs(amount)} unit(s). New Qty: ${newQty}`);
+            
+            const isNowLow = itemType === 'Package(s)' ? (newQty <= 0) : (newQty <= 5);
+            if (isNowLow) {
+                const alertMsg = itemType === 'Package(s)' 
+                    ? `Warning: Package item "${item.name}" has reached 0!` 
+                    : `Low Stock Alert: ${item.name} is down to ${newQty} units!`;
+                showToast(alertMsg, 'alert');
+            } else {
+                showToast(`Stock updated: ${item.name} is now at ${newQty} units.`, 'info');
+            }
+
+            saveState();
+            renderInventoryTable();
+        }
+
+        function editInventory(idx) {
+            const item = (state.inventory || [])[idx];
+            if(!item) return;
+            document.getElementById('editing-inv-id').value = item.id;
+            document.getElementById('inv-item-name').value = item.name;
+            document.getElementById('inv-item-type').value = item.type || 'Piece(s)';
+            document.getElementById('inv-item-qty').value = item.qty;
+            document.getElementById('inv-submit-btn').textContent = 'Update Item';
+            document.getElementById('inv-cancel-btn').classList.remove('hidden');
+        }
+
+        function resetInventoryForm() {
+            document.getElementById('inventory-form').reset();
+            document.getElementById('editing-inv-id').value = '';
+            document.getElementById('inv-submit-btn').textContent = 'Add Item';
+            document.getElementById('inv-cancel-btn').classList.add('hidden');
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventory-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            let lowStockCount = 0;
+
+            (state.inventory || []).forEach((item, idx) => {
+                const itemType = item.type || 'Piece(s)';
+                const isLow = itemType === 'Package(s)' ? (item.qty <= 0) : (item.qty <= 5);
+                if(isLow) lowStockCount++;
+
+                const statusBadge = isLow 
+                    ? (itemType === 'Package(s)'
+                        ? '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Reached 0 ⚠️</span>'
+                        : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Low Stock ⚠️</span>')
+                    : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">In Stock</span>';
+                
+                const typeBadgeClass = itemType === 'Package(s)' 
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' 
+                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-100 dark:border-gray-800 ${isLow ? 'bg-red-500/5 dark:bg-red-500/10' : ''}">
+                        <td class="p-3 font-semibold">${escapeHtml(item.name)}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 text-[10px] font-bold rounded ${typeBadgeClass}">${itemType}</span></td>
+                        <td class="p-3 text-center font-bold text-sm">${item.qty}</td>
+                        <td class="p-3 text-center">
+                            <div class="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
+                                <button onclick="adjustInventoryQty(${idx}, -1)" class="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Minus 1 (Sold)"><i class="fa-solid fa-minus"></i></button>
+                                <span class="px-2 text-[10px] text-gray-400 font-bold uppercase">Qty</span>
+                                <button onclick="adjustInventoryQty(${idx}, 1)" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Plus 1 (Bought)"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </td>
+                        <td class="p-3 text-center">${statusBadge}</td>
+                        <td class="p-3 text-center flex justify-center gap-2">
+                            <button onclick="editInventory(${idx})" class="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 rounded" title="Edit Item"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteInventory(${idx})" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-gray-800 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const banner = document.getElementById('low-stock-alert-banner');
+            const countBadge = document.getElementById('low-stock-count-badge');
+            if(banner && countBadge) {
+                if(lowStockCount > 0) {
+                    banner.classList.remove('hidden');
+                    countBadge.textContent = `${lowStockCount} item(s) require attention (Package at 0 / Piece low)!`;
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+        }
+
+        function deleteInventory(idx) {
+            const itemName = (state.inventory || [])[idx]?.name || 'Item';
+            state.inventory.splice(idx, 1);
+            saveState();
+            renderInventoryTable();
+            logAudit(`Removed inventory item: ${itemName}`);
+            showToast(`Removed item: ${itemName}`, 'info');
+        }
+
+        function renderCRMTable() {
+            const tbody = document.getElementById('crm-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const clientsMap = {};
+            (state.records || []).forEach(r => {
+                const key = r.name.toLowerCase();
+                if(!clientsMap[key]) {
+                    clientsMap[key] = { name: r.name, phone: r.phone, visits: 0, totalSpend: 0 };
+                }
+                clientsMap[key].visits += 1;
+                clientsMap[key].totalSpend += r.amount;
+            });
+
+            Object.values(clientsMap).forEach(c => {
+                let tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-gray-100 text-gray-700">Standard</span>';
+                if(c.totalSpend >= 500000 || c.visits >= 5) {
+                    tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-purple-100 text-purple-700"><i class="fa-solid fa-crown mr-1"></i> VIP Client</span>';
+                } else if(c.visits >= 2) {
+                    tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-700">Regular</span>';
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="p-3 font-bold">${escapeHtml(c.name)}</td>
+                        <td class="p-3">${escapeHtml(c.phone)}</td>
+                        <td class="p-3 font-semibold">${c.visits}</td>
+                        <td class="p-3 text-right font-black text-emerald-600">${formatMoney(c.totalSpend)}</td>
+                        <td class="p-3 text-center">${tier}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderTaxAnalytics() {
+            let totalRev = 0, totalExp = 0;
+            (state.records || []).forEach(r => totalRev += r.amount);
+            (state.expenses || []).forEach(e => totalExp += e.amount);
+            const netProfit = totalRev - totalExp;
+            const estimatedTax = netProfit > 0 ? netProfit * 0.15 : 0;
+            const postTax = netProfit - estimatedTax;
+
+            document.getElementById('tax-gross-rev').textContent = formatMoney(totalRev);
+            document.getElementById('tax-estimated-due').textContent = formatMoney(estimatedTax);
+            document.getElementById('tax-post-net').textContent = formatMoney(postTax);
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expenses-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            (state.expenses || []).forEach((ex, idx) => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <td class="p-3">${ex.date}</td>
+                        <td class="p-3 font-semibold">${escapeHtml(ex.title)}</td>
+                        <td class="p-3 text-right font-bold text-red-500">${formatMoney(ex.amount)}</td>
+                        <td class="p-3 text-center flex justify-center gap-2">
+                            <button onclick="editExpense(${idx})" class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Edit Expense"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteExpense(${idx})" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteExpense(idx) {
+            const exTitle = (state.expenses || [])[idx]?.title || 'Expense';
+            state.expenses.splice(idx, 1);
+            saveState();
+            renderExpensesTable();
+            renderDashboard();
+            renderTaxAnalytics();
+            logAudit(`Deleted expense: ${exTitle}`);
+        }
+
+        function renderRecordsTable() {
+            const tbody = document.getElementById('records-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+            const serviceTypeFilter = document.getElementById('filter-service-type')?.value || 'ALL';
+            const paymentFilter = document.getElementById('filter-payment')?.value || 'ALL';
+            const sortOption = document.getElementById('sort-select')?.value || 'date-desc';
+            const dateFrom = document.getElementById('filter-date-from')?.value || '';
+            const dateTo = document.getElementById('filter-date-to')?.value || '';
+
+            let filtered = (state.records || []).filter(r => {
+                const matchSearch = r.id.toLowerCase().includes(searchTerm) ||
+                                    r.name.toLowerCase().includes(searchTerm) ||
+                                    r.phone.toLowerCase().includes(searchTerm) ||
+                                    r.service.toLowerCase().includes(searchTerm);
+                const sType = r.serviceType || 'IREMBO';
+                const matchServiceType = serviceTypeFilter === 'ALL' || sType === serviceTypeFilter;
+                const matchPayment = paymentFilter === 'ALL' || r.method === paymentFilter;
+                let matchDate = true;
+                if(dateFrom && r.date < dateFrom) matchDate = false;
+                if(dateTo && r.date > dateTo) matchDate = false;
+                return matchSearch && matchServiceType && matchPayment && matchDate;
+            });
+
+            filtered.sort((a, b) => {
+                if(sortOption === 'date-desc') return `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`);
+                if(sortOption === 'date-asc') return `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
+                if(sortOption === 'amount-desc') return b.amount - a.amount;
+                if(sortOption === 'name-asc') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            const countEl = document.getElementById('records-count');
+            if(countEl) countEl.textContent = filtered.length;
+
+            filtered.forEach(r => {
+                const sType = r.serviceType || 'IREMBO';
+                const sTypeBadge = sType === 'IREMBO' 
+                    ? '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">IREMBO</span>'
+                    : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">IT</span>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
+                        <td class="py-3 px-4 font-mono font-bold text-emerald-600">${r.id}</td>
+                        <td class="py-3 px-4 text-xs">${r.date} ${r.time}</td>
+                        <td class="py-3 px-4 font-bold cursor-pointer hover:underline text-blue-500" onclick="openClientLedger('${r.name}')">${escapeHtml(r.name)}</td>
+                        <td class="py-3 px-4 text-xs">${escapeHtml(r.phone)}</td>
+                        <td class="py-3 px-4">${sTypeBadge}</td>
+                        <td class="py-3 px-4 text-xs">${escapeHtml(r.service)}</td>
+                        <td class="py-3 px-4 font-extrabold">${formatMoney(r.amount)}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] font-bold rounded-full ${r.method==='MomoPay'?'bg-amber-100 text-amber-800':'bg-teal-100 text-teal-800'}">${r.method}</span></td>
+                        <td class="py-3 px-4 text-center flex justify-center gap-2">
+                            <button onclick="viewRecord('${r.id}')" class="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg" title="View Full Record Information"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="editRecord('${r.id}')" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg" title="Edit Record"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord('${r.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function clearDateFilter() {
+            if(document.getElementById('filter-date-from')) document.getElementById('filter-date-from').value = '';
+            if(document.getElementById('filter-date-to')) document.getElementById('filter-date-to').value = '';
+            renderRecordsTable();
+        }
+
+        function deleteRecord(id) {
+            if(confirm(`Delete record ${id}?`)) {
+                state.records = (state.records || []).filter(r => r.id !== id);
+                logAudit(`Deleted client record ${id}`);
+                saveState();
+                refreshAllViews();
+            }
+        }
+
+        function openClientLedger(name) {
+            const clientRecs = (state.records || []).filter(r => r.name.toLowerCase() === name.toLowerCase());
+            let total = 0;
+            clientRecs.forEach(r => total += r.amount);
+
+            document.getElementById('ledger-client-name').textContent = `Ledger: ${name}`;
+            document.getElementById('ledger-visits').textContent = clientRecs.length;
+            document.getElementById('ledger-spend').textContent = formatMoney(total);
+
+            const list = document.getElementById('ledger-history-list');
+            list.innerHTML = '';
+            clientRecs.forEach(r => {
+                const sType = r.serviceType || 'IREMBO';
+                list.innerHTML += `<div class="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl flex justify-between text-xs"><span>${r.date} [${sType}] - ${r.service}</span><span class="font-bold">${formatMoney(r.amount)}</span></div>`;
+            });
+            document.getElementById('client-ledger-modal').classList.remove('hidden');
+        }
+
+        function closeLedgerModal() {
+            document.getElementById('client-ledger-modal').classList.add('hidden');
+        }
+
+        function renderDashboard() {
+            const period = document.getElementById('dashboard-period-filter')?.value || 'all';
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let filtered = state.records || [];
+            if (period === 'today') {
+                filtered = (state.records || []).filter(r => r.date === todayStr);
+            } else if (period === 'week') {
+                const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+                filtered = (state.records || []).filter(r => r.date >= weekAgo);
+            } else if (period === 'month') {
+                const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+                filtered = (state.records || []).filter(r => r.date >= monthAgo);
+            }
+
+            let totalRev = 0, momoRev = 0, cashRev = 0, totalExp = 0;
+            filtered.forEach(r => {
+                totalRev += r.amount;
+                if(r.method === 'MomoPay') momoRev += r.amount;
+                if(r.method === 'Cash') cashRev += r.amount;
+            });
+            (state.expenses || []).forEach(e => totalExp += e.amount);
+            const netProfit = totalRev - totalExp;
+
+            document.getElementById('dash-total-revenue').textContent = formatMoney(totalRev);
+            document.getElementById('dash-revenue-sub').textContent = `${filtered.length} sales`;
+            document.getElementById('dash-total-expenses').textContent = formatMoney(totalExp);
+            document.getElementById('dash-net-profit').textContent = formatMoney(netProfit);
+            document.getElementById('dash-total-clients').textContent = filtered.length;
+            document.getElementById('dash-momopay-total').textContent = formatMoney(momoRev);
+            document.getElementById('dash-momopay-pct').textContent = totalRev > 0 ? `${((momoRev/totalRev)*100).toFixed(0)}%` : '0%';
+            document.getElementById('dash-cash-total').textContent = formatMoney(cashRev);
+            document.getElementById('dash-cash-pct').textContent = totalRev > 0 ? `${((cashRev/totalRev)*100).toFixed(0)}%` : '0%';
+
+            renderCharts(filtered);
+        }
+
+        function renderCharts(filteredRecords) {
+            const ctx1 = document.getElementById('chart-revenue-timeline')?.getContext('2d');
+            if(ctx1) {
+                if(revenueChart) revenueChart.destroy();
+                const dates = [...new Set(filteredRecords.map(r => r.date))].sort();
+                const revVals = dates.map(d => filteredRecords.filter(r => r.date === d).reduce((acc, curr) => acc + curr.amount, 0));
+
+                revenueChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: dates.length ? dates : ['Today'],
+                        datasets: [{
+                            label: 'Revenue Trend',
+                            data: revVals.length ? revVals : [0],
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const ctx2 = document.getElementById('chart-peak-hours')?.getContext('2d');
+            if(ctx2) {
+                if(peakChart) peakChart.destroy();
+                const hours = Array(24).fill(0);
+                filteredRecords.forEach(r => {
+                    const h = parseInt(r.time.split(':')[0]) || 0;
+                    hours[h]++;
+                });
+
+                peakChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: hours.map((_, i) => `${i}:00`),
+                        datasets: [{ label: 'Transactions', data: hours, backgroundColor: '#3b82f6' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        function applyReportPreset(preset) {
+            const customDateContainer = document.getElementById('report-custom-date-container');
+            if(preset === 'custom') {
+                if(customDateContainer) customDateContainer.classList.remove('hidden');
+            } else {
+                if(customDateContainer) customDateContainer.classList.add('hidden');
+            }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            let filtered = state.records || [];
+            
+            if(preset === 'today') {
+                filtered = (state.records || []).filter(r => r.date === todayStr);
+            } else if(preset === 'week') {
+                const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+                filtered = (state.records || []).filter(r => r.date >= weekAgo);
+            } else if(preset === 'month') {
+                const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+                filtered = (state.records || []).filter(r => r.date >= monthAgo);
+            } else if(preset === 'custom') {
+                const fromVal = document.getElementById('report-date-from')?.value || '';
+                const toVal = document.getElementById('report-date-to')?.value || '';
+                filtered = (state.records || []).filter(r => {
+                    let ok = true;
+                    if(fromVal && r.date < fromVal) ok = false;
+                    if(toVal && r.date > toVal) ok = false;
+                    return ok;
+                });
+            }
+            renderReportPreview(filtered);
+        }
+
+        function renderReportPreview(filteredRecords = null) {
+            const preset = document.getElementById('report-preset')?.value || 'today';
+            if(!filteredRecords) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                if(preset === 'today') {
+                    filteredRecords = (state.records || []).filter(r => r.date === todayStr);
+                } else if(preset === 'week') {
+                    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+                    filteredRecords = (state.records || []).filter(r => r.date >= weekAgo);
+                } else if(preset === 'month') {
+                    const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+                    filteredRecords = (state.records || []).filter(r => r.date >= monthAgo);
+                } else if(preset === 'custom') {
+                    const fromVal = document.getElementById('report-date-from')?.value || '';
+                    const toVal = document.getElementById('report-date-to')?.value || '';
+                    filteredRecords = (state.records || []).filter(r => {
+                        let ok = true;
+                        if(fromVal && r.date < fromVal) ok = false;
+                        if(toVal && r.date > toVal) ok = false;
+                        return ok;
+                    });
+                } else {
+                    filteredRecords = state.records || [];
+                }
+            }
+
+            let totalRev = 0, totalExp = 0;
+            filteredRecords.forEach(r => totalRev += r.amount);
+            (state.expenses || []).forEach(e => totalExp += e.amount);
+
+            document.getElementById('pdf-generated-at').textContent = new Date().toLocaleString();
+            document.getElementById('pdf-total-rev').textContent = formatMoney(totalRev);
+            document.getElementById('pdf-total-exp').textContent = formatMoney(totalExp);
+            document.getElementById('pdf-net-prof').textContent = formatMoney(totalRev - totalExp);
+
+            const customMemo = document.getElementById('report-custom-memo')?.value || 'Official Operations & Financial Statement';
+            const customAuthor = document.getElementById('report-custom-author')?.value || 'Muhikira Darcie (Enterprise Admin)';
+            
+            if(document.getElementById('pdf-header-subtitle')) document.getElementById('pdf-header-subtitle').textContent = customMemo;
+            if(document.getElementById('pdf-footer-author')) document.getElementById('pdf-footer-author').textContent = customAuthor;
+
+            // Separate Irembo vs IT records
+            let iremboRecs = filteredRecords.filter(r => (r.serviceType || 'IREMBO') === 'IREMBO');
+            let itRecs = filteredRecords.filter(r => r.serviceType === 'IT');
+
+            let iremboTotal = 0;
+            iremboRecs.forEach(r => iremboTotal += r.amount);
+
+            let itTotal = 0;
+            itRecs.forEach(r => itTotal += r.amount);
+
+            document.getElementById('pdf-irembo-total').textContent = formatMoney(iremboTotal);
+            document.getElementById('pdf-it-total').textContent = formatMoney(itTotal);
+
+            const iremboTbody = document.getElementById('pdf-irembo-tbody');
+            const itTbody = document.getElementById('pdf-it-tbody');
+
+            if(iremboTbody) {
+                iremboTbody.innerHTML = '';
+                if(iremboRecs.length === 0) {
+                    iremboTbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-gray-400 italic">No Irembo services recorded.</td></tr>`;
+                } else {
+                    iremboRecs.forEach(r => {
+                        iremboTbody.innerHTML += `
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2 px-2 font-bold text-gray-900">${escapeHtml(r.name)}</td>
+                                <td class="py-2 px-2 text-gray-600">${escapeHtml(r.service)}</td>
+                                <td class="py-2 px-2 text-right font-black text-emerald-600">${formatMoney(r.amount)}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            if(itTbody) {
+                itTbody.innerHTML = '';
+                if(itRecs.length === 0) {
+                    itTbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-gray-400 italic">No IT services recorded.</td></tr>`;
+                } else {
+                    itRecs.forEach(r => {
+                        itTbody.innerHTML += `
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2 px-2 font-bold text-gray-900">${escapeHtml(r.name)}</td>
+                                <td class="py-2 px-2 text-gray-600">${escapeHtml(r.service)}</td>
+                                <td class="py-2 px-2 text-right font-black text-blue-600">${formatMoney(r.amount)}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+        }
+
+        function exportReportToPDF() {
+            const element = document.getElementById('pdf-report-document');
+            const opt = {
+                margin:       10,
+                filename:     `MDDR_Enterprise_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+            logAudit('Exported high-resolution financial report to PDF');
+        }
+
+        function renderAuditLog() {
+            const tbody = document.getElementById('audit-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('audit-search-input')?.value || '').toLowerCase();
+            const filterType = document.getElementById('audit-filter-type')?.value || 'ALL';
+
+            let filtered = (state.auditLog || []).filter(a => {
+                const matchSearch = a.time.toLowerCase().includes(searchTerm) ||
+                                    a.role.toLowerCase().includes(searchTerm) ||
+                                    a.action.toLowerCase().includes(searchTerm);
+                let matchType = true;
+                const actLower = a.action.toLowerCase();
+                if(filterType === 'Added' && !actLower.includes('add') && !actLower.includes('registered') && !actLower.includes('saved')) matchType = false;
+                if(filterType === 'Updated' && !actLower.includes('update') && !actLower.includes('edit')) matchType = false;
+                if(filterType === 'Deleted' && !actLower.includes('delete') && !actLower.includes('removed')) matchType = false;
+                return matchSearch && matchType;
+            });
+
+            const totalCount = (state.auditLog || []).length;
+            const todayStr = new Date().toLocaleDateString();
+            const todayCount = (state.auditLog || []).filter(a => a.time.includes(todayStr)).length;
+            const dangerCount = (state.auditLog || []).filter(a => a.action.toLowerCase().includes('delete') || a.action.toLowerCase().includes('removed')).length;
+
+            if(document.getElementById('audit-total-count')) document.getElementById('audit-total-count').textContent = totalCount;
+            if(document.getElementById('audit-today-count')) document.getElementById('audit-today-count').textContent = todayCount;
+            if(document.getElementById('audit-danger-count')) document.getElementById('audit-danger-count').textContent = dangerCount;
+
+            filtered.forEach(a => {
+                let badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-gray-100 text-gray-700">System</span>';
+                const actLower = a.action.toLowerCase();
+                if(actLower.includes('add') || actLower.includes('saved') || actLower.includes('registered')) {
+                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-700">Creation</span>';
+                } else if(actLower.includes('update') || actLower.includes('edit')) {
+                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-700">Modification</span>';
+                } else if(actLower.includes('delete') || actLower.includes('removed')) {
+                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-700">Deletion</span>';
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
+                        <td class="p-3 font-mono text-gray-500">${a.time}</td>
+                        <td class="p-3 font-bold text-emerald-600">${a.role}</td>
+                        <td class="p-3 font-medium">${escapeHtml(a.action)}</td>
+                        <td class="p-3 text-center">${badge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function exportAuditCSV() {
+            let csv = 'Timestamp,User Role,Action Performed\n';
+            (state.auditLog || []).forEach(a => {
+                csv += `"${a.time}","${a.role}","${a.action.replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `MDDR_Audit_Log_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            logAudit('Exported system audit trail to CSV');
+        }
+
+        function clearAuditLog() {
+            if(confirm('Are you sure you want to clear the entire audit log?')) {
+                state.auditLog = [];
+                saveState();
+                renderAuditLog();
+            }
+        }
+
+        function exportJSONBackup() {
+            const fullBackup = {
+                appState: state,
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+            };
+
+            const blob = new Blob([JSON.stringify(fullBackup, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `MDDR_Firestore_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            logAudit('Exported cloud database backup (JSON)');
+        }
+
+        function importJSONBackup(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    const targetState = parsed.appState || parsed;
+
+                    state = {
+                        currency: targetState.currency || 'RWF',
+                        fontSize: targetState.fontSize || 'md',
+                        records: targetState.records || [],
+                        expenses: targetState.expenses || [],
+                        inventory: targetState.inventory || [],
+                        bookings: targetState.bookings || [],
+                        auditLog: targetState.auditLog || []
+                    };
+
+                    const htmlEl = document.documentElement;
+                    if(parsed.theme === 'dark') {
+                        htmlEl.classList.add('dark');
+                    } else if(parsed.theme === 'light') {
+                        htmlEl.classList.remove('dark');
+                    }
+
+                    saveState();
+                    refreshAllViews();
+                    switchTab('dashboard');
+                    logAudit('Imported database state from JSON into Firestore');
+                    alert('Firestore database successfully updated from JSON import!');
+                } catch(err) { 
+                    console.error(err);
+                    alert('Invalid backup JSON file.'); 
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function escapeHtml(str) {
+            if(!str) return '';
+            return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+        }
+    </script>
+</body>
+</html>
