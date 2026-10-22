@@ -97,7 +97,7 @@
                     </div>
                     <div>
                         <h1 class="font-extrabold text-base tracking-tight leading-tight text-gray-900 dark:text-white">Muhikira Darcie</h1>
-                        <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Enterprise v2.8 + Firestore</p>
+                        <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Business Suite v1.0</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400">
@@ -250,12 +250,17 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">Peak Hours Heatmap</h4>
-                                <span class="text-xs text-gray-400">By Time of Day</span>
+                        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                                        <i class="fa-solid fa-fire text-amber-500"></i> Peak Hours Heatmap
+                                    </h4>
+                                    <p class="text-[11px] text-gray-400">Hourly Client Density (07:00 – 22:00)</p>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Live Heatmap</span>
                             </div>
-                            <div class="h-64 relative flex items-center justify-center">
+                            <div class="h-60 relative w-full pt-2">
                                 <canvas id="chart-peak-hours"></canvas>
                             </div>
                         </div>
@@ -566,19 +571,34 @@
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Tax Liability & Corporate Financial Analysis</h3>
                             <p class="text-xs text-gray-500">Estimated tax reserves and gross vs. net financial standing.</p>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                                <p class="text-xs uppercase text-gray-400 font-bold">Gross Revenue</p>
-                                <p class="text-lg font-black text-emerald-600 mt-1" id="tax-gross-rev">0 RWF</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"><p class="text-xs uppercase text-gray-400 font-bold">Gross Revenue</p><p class="text-lg font-black text-emerald-600 mt-1" id="tax-gross-rev">0 RWF</p><p class="text-[11px] text-gray-500 mt-1">All recorded transactions</p></div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"><p class="text-xs uppercase text-gray-400 font-bold">Operating Expenses</p><p class="text-lg font-black text-rose-500 mt-1" id="tax-total-expenses">0 RWF</p><p class="text-[11px] text-gray-500 mt-1">Recorded outlays</p></div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"><p class="text-xs uppercase text-gray-400 font-bold">Estimated Tax Reserve</p><p class="text-lg font-black text-amber-500 mt-1" id="tax-estimated-due">0 RWF</p><p class="text-[11px] text-gray-500 mt-1">Planning estimate only</p></div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700"><p class="text-xs uppercase text-gray-400 font-bold">Post-Tax Net Income</p><p class="text-lg font-black text-blue-500 mt-1" id="tax-post-net">0 RWF</p><p class="text-[11px] text-gray-500 mt-1">After estimated reserve</p></div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <div class="lg:col-span-1 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <h4 class="text-sm font-bold mb-1">Tax Planning Assumption</h4>
+                                <p class="text-xs text-gray-500 mb-3">Adjust the planning rate to model a reserve. This is not a tax determination.</p>
+                                <label for="tax-rate-input" class="block text-xs font-semibold text-gray-500 mb-1">Estimated rate (%)</label>
+                                <div class="flex gap-2 items-center"><input id="tax-rate-input" type="number" min="0" max="100" step="0.5" value="15" oninput="renderTaxAnalytics()" class="w-28 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm font-bold"><span class="text-sm text-gray-500">%</span></div>
+                                <p class="text-[11px] text-amber-600 mt-3">Confirm applicable taxes and rates with RRA or a qualified tax professional.</p>
                             </div>
-                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                                <p class="text-xs uppercase text-gray-400 font-bold">Estimated Tax Reserve (15% Net)</p>
-                                <p class="text-lg font-black text-amber-500 mt-1" id="tax-estimated-due">0 RWF</p>
+                            <div class="lg:col-span-2 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <h4 class="text-sm font-bold mb-3">Profitability & Cash Position</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div><p class="text-xs text-gray-500">Pre-tax profit</p><p id="tax-pre-net" class="font-bold text-gray-900 dark:text-white mt-1">0 RWF</p></div>
+                                    <div><p class="text-xs text-gray-500">Net margin</p><p id="tax-net-margin" class="font-bold text-indigo-500 mt-1">0%</p></div>
+                                    <div><p class="text-xs text-gray-500">Revenue after expenses</p><p id="tax-revenue-after-expenses" class="font-bold text-emerald-500 mt-1">0 RWF</p></div>
+                                </div>
+                                <div class="mt-4 h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"><div id="tax-margin-bar" class="h-full bg-emerald-500 rounded-full transition-all" style="width:0%"></div></div>
+                                <p class="text-[10px] text-gray-400 mt-2">Margin indicator is based on recorded revenue and expenses only.</p>
                             </div>
-                            <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                                <p class="text-xs uppercase text-gray-400 font-bold">Post-Tax Net Income</p>
-                                <p class="text-lg font-black text-blue-500 mt-1" id="tax-post-net">0 RWF</p>
-                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <div class="flex flex-wrap justify-between items-center gap-2 mb-3"><div><h4 class="text-sm font-bold">Service Revenue Breakdown</h4><p class="text-xs text-gray-500">Recorded revenue split by service category.</p></div><span id="tax-service-total" class="text-xs font-bold text-emerald-500">0 RWF</span></div>
+                            <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-left text-xs uppercase text-gray-500 border-b border-gray-200 dark:border-gray-700"><th class="py-2">Service Category</th><th class="py-2 text-right">Transactions</th><th class="py-2 text-right">Revenue</th><th class="py-2 text-right">Share</th></tr></thead><tbody id="tax-service-breakdown" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody></table></div>
                         </div>
                     </div>
                 </section>
@@ -716,9 +736,33 @@
                                 </div>
                             </div>
 
+                            <!-- OPERATIONAL EXPENSES AUDIT SECTION -->
+                            <div class="space-y-3 pt-2 border-t border-gray-100">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                                        <i class="fa-solid fa-receipt text-rose-600"></i> Operational Expenses Ledger
+                                    </h4>
+                                    <span class="text-xs font-bold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full" id="pdf-expenses-summary-badge">Total Outlays: 0 RWF</span>
+                                </div>
+                                <div class="border border-rose-200 rounded-xl p-4 bg-rose-50/20 space-y-3">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left border-collapse text-[11px]">
+                                            <thead>
+                                                <tr class="text-gray-500 uppercase text-[9px] border-b border-rose-200">
+                                                    <th class="py-1.5 px-2">Date</th>
+                                                    <th class="py-1.5 px-2">Expense Description</th>
+                                                    <th class="py-1.5 px-2 text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pdf-expenses-tbody" class="divide-y divide-gray-100 text-gray-800"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-gray-500 gap-2">
                                 <p>Prepared by: <span id="pdf-footer-author" class="text-gray-900 font-semibold">Muhikira Darcie</span></p>
-                                <p class="font-mono text-[10px]">MDDR Enterprise Suite v2.8 • Firestore Cloud Ledger</p>
+                                <p class="font-mono text-[10px]">MDDR Business Suite v1.0 • Digital Ledger</p>
                             </div>
                         </div>
                     </div>
@@ -1249,6 +1293,7 @@
 
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
+            renderDashboard(); // Rerender charts to match system/theme colors
         }
 
         function changeCurrency(val) {
@@ -1308,6 +1353,216 @@
             const date = document.getElementById('entry-date').value.split('-').reverse().join('');
             const time = document.getElementById('entry-time').value.replace(':', '');
             document.getElementById('live-client-id').textContent = `MDDR${date}${time}`;
+        }
+
+        // --- DASHBOARD RENDERING & PROFESSIONAL PEAK HOURS HEATMAP ---
+        function renderDashboard() {
+            const filter = document.getElementById('dashboard-period-filter')?.value || 'today';
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let filteredRecords = state.records || [];
+            let filteredExpenses = state.expenses || [];
+
+            if(filter === 'today') {
+                filteredRecords = filteredRecords.filter(r => r.date === todayStr);
+                filteredExpenses = filteredExpenses.filter(e => e.date === todayStr);
+            } else if(filter === 'week') {
+                const now = new Date();
+                const weekAgo = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+                filteredRecords = filteredRecords.filter(r => r.date >= weekAgo);
+                filteredExpenses = filteredExpenses.filter(e => e.date >= weekAgo);
+            } else if(filter === 'month') {
+                const now = new Date();
+                const monthAgo = new Date(now.setMonth(now.getMonth() - 1)).toISOString().split('T')[0];
+                filteredRecords = filteredRecords.filter(r => r.date >= monthAgo);
+                filteredExpenses = filteredExpenses.filter(e => e.date >= monthAgo);
+            }
+
+            const totalRev = filteredRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const totalExp = filteredExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+            const netProf = totalRev - totalExp;
+
+            const momoTotal = filteredRecords.filter(r => r.method === 'MomoPay').reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const cashTotal = filteredRecords.filter(r => r.method === 'Cash').reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+            document.getElementById('dash-total-revenue').textContent = formatMoney(totalRev);
+            document.getElementById('dash-revenue-sub').textContent = `${filteredRecords.length} recorded transactions`;
+            document.getElementById('dash-total-expenses').textContent = formatMoney(totalExp);
+            document.getElementById('dash-net-profit').textContent = formatMoney(netProf);
+            document.getElementById('dash-total-clients').textContent = filteredRecords.length;
+
+            document.getElementById('dash-momopay-total').textContent = formatMoney(momoTotal);
+            document.getElementById('dash-momopay-pct').textContent = totalRev ? `${Math.round((momoTotal / totalRev) * 100)}% of revenue` : '0%';
+
+            document.getElementById('dash-cash-total').textContent = formatMoney(cashTotal);
+            document.getElementById('dash-cash-pct').textContent = totalRev ? `${Math.round((cashTotal / totalRev) * 100)}% of revenue` : '0%';
+
+            // Render Timeline Revenue Chart
+            renderRevenueTimelineChart(filteredRecords);
+
+            // Render Professional Heatmap (07:00 - 22:00)
+            renderPeakHoursHeatmapChart(filteredRecords);
+        }
+
+        function renderRevenueTimelineChart(records) {
+            const ctx = document.getElementById('chart-revenue-timeline');
+            if(!ctx) return;
+            if(revenueChart) revenueChart.destroy();
+
+            const dateMap = {};
+            records.forEach(r => { dateMap[r.date] = (dateMap[r.date] || 0) + (parseFloat(r.amount) || 0); });
+            const sortedDates = Object.keys(dateMap).sort();
+            const actualLabels = sortedDates.length ? sortedDates : [new Date().toISOString().split('T')[0]];
+            const actualData = sortedDates.map(d => dateMap[d]);
+            if(!actualData.length) actualData.push(0);
+
+            // Simple transparent forecast: mean of up to the last 3 observed days, projected forward.
+            const sample = actualData.slice(-3);
+            const average = sample.reduce((a,b) => a+b, 0) / Math.max(sample.length, 1);
+            const forecastLabels = [];
+            const forecastValues = [];
+            const forecastStart = new Date((sortedDates[sortedDates.length - 1] || new Date().toISOString().split('T')[0]) + 'T12:00:00');
+            for(let i=1; i<=3; i++) {
+                const d = new Date(forecastStart);
+                d.setDate(d.getDate()+i);
+                forecastLabels.push(d.toISOString().split('T')[0]);
+                forecastValues.push(average);
+            }
+            const labels = [...actualLabels, ...forecastLabels];
+            const actualLine = [...actualData, null, null, null];
+            const projectionLine = [...Array(Math.max(0, actualData.length-1)).fill(null), actualData[actualData.length-1], ...forecastValues];
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [
+                    { label:'Recorded Revenue', data:actualLine, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,.12)', borderWidth:3, fill:true, tension:.32, pointRadius:3, pointHoverRadius:6, spanGaps:false },
+                    { label:'Indicative 3-Day Projection', data:projectionLine, borderColor:'#818cf8', backgroundColor:'rgba(129,140,248,.08)', borderWidth:2.5, borderDash:[7,5], fill:false, tension:.25, pointRadius:3, pointStyle:'rectRot', spanGaps:false }
+                ]},
+                options: {
+                    responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+                    plugins:{ legend:{display:true,position:'bottom',labels:{color:textColor,usePointStyle:true,boxWidth:8,padding:16,font:{size:10}}}, tooltip:{callbacks:{label: c => `${c.dataset.label}: ${formatMoney(c.parsed.y || 0)}`} } },
+                    scales:{ x:{ticks:{color:textColor,maxRotation:0,autoSkip:true,maxTicksLimit:8,font:{size:10}},grid:{color:gridColor}}, y:{beginAtZero:true,ticks:{color:textColor,font:{size:10},callback:v => new Intl.NumberFormat().format(v)},grid:{color:gridColor}} }
+                }
+            });
+        }
+
+        // --- ENHANCED PROFESSIONAL PEAK HOURS HEATMAP (7:00 to 22:00) ---
+        function renderPeakHoursHeatmapChart(records) {
+            const ctx = document.getElementById('chart-peak-hours');
+            if(!ctx) return;
+
+            if(peakChart) peakChart.destroy();
+
+            // Setup time slots from 07:00 to 22:00
+            const hoursRange = [];
+            const hourCounts = {};
+            for(let h = 7; h <= 22; h++) {
+                const hourStr = `${String(h).padStart(2, '0')}:00`;
+                hoursRange.push(hourStr);
+                hourCounts[h] = 0;
+            }
+
+            // Map records into hour bins (7:00 - 22:00)
+            records.forEach(r => {
+                if(r.time) {
+                    const h = parseInt(r.time.split(':')[0], 10);
+                    if(h >= 7 && h <= 22) {
+                        hourCounts[h] = (hourCounts[h] || 0) + 1;
+                    }
+                }
+            });
+
+            const dataValues = hoursRange.map(timeStr => {
+                const h = parseInt(timeStr.split(':')[0], 10);
+                return hourCounts[h] || 0;
+            });
+
+            const peakIndex = dataValues.indexOf(Math.max(...dataValues));
+            const peakHourEl = document.getElementById('peak-busiest-hour');
+            const peakCountEl = document.getElementById('peak-busiest-count');
+            if(peakHourEl) peakHourEl.textContent = dataValues[peakIndex] > 0 ? hoursRange[peakIndex] : 'No data';
+            if(peakCountEl) peakCountEl.textContent = String(dataValues[peakIndex] || 0);
+            const maxVal = Math.max(...dataValues, 1);
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+            // Dynamic heatmap color intensity per hour bar
+            const barBackgrounds = dataValues.map(val => {
+                if(val === 0) return isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)';
+                const ratio = val / maxVal;
+                if(ratio > 0.75) return 'rgba(239, 68, 68, 0.85)'; // Peak / High density (Red)
+                if(ratio > 0.4) return 'rgba(245, 158, 11, 0.85)';  // Medium density (Amber)
+                return 'rgba(34, 197, 94, 0.85)';                 // Low density (Emerald)
+            });
+
+            const barBorders = dataValues.map(val => {
+                if(val === 0) return 'transparent';
+                const ratio = val / maxVal;
+                if(ratio > 0.75) return '#dc2626';
+                if(ratio > 0.4) return '#d97706';
+                return '#16a34a';
+            });
+
+            peakChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: hoursRange,
+                    datasets: [{
+                        label: 'Clients Recorded',
+                        data: dataValues,
+                        backgroundColor: barBackgrounds,
+                        borderColor: barBorders,
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.85
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: isDark ? '#111827' : '#ffffff',
+                            titleColor: isDark ? '#ffffff' : '#111827',
+                            bodyColor: isDark ? '#34d399' : '#059669',
+                            borderColor: isDark ? '#374151' : '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: (items) => `Time Slot: ${items[0].label}`,
+                                label: (context) => `Client Traffic: ${context.raw} client(s)`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: textColor,
+                                font: { size: 9, weight: '600' },
+                                maxRotation: 45,
+                                minRotation: 0
+                            },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: textColor,
+                                font: { size: 9 },
+                                precision: 0
+                            },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
         }
 
         // --- BOOKING & ORDERING LOGIC ---
@@ -1405,80 +1660,118 @@
             });
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No bookings or orders found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">No bookings or product orders found.</td></tr>`;
                 return;
             }
 
             filtered.forEach(b => {
-                let statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-100 text-yellow-800">Pending</span>';
-                if(b.status === 'Confirmed') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-800">Confirmed</span>';
-                if(b.status === 'Completed') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">Completed</span>';
-                if(b.status === 'Cancelled') statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-800">Cancelled</span>';
+                let badgeClass = 'bg-amber-500/10 text-amber-600 border-amber-500/30';
+                if(b.status === 'Confirmed') badgeClass = 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+                if(b.status === 'Completed') badgeClass = 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
+                if(b.status === 'Cancelled') badgeClass = 'bg-red-500/10 text-red-600 border-red-500/30';
 
-                const typeBadge = b.type === 'Service Booking' 
-                    ? '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">Service</span>'
-                    : '<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">Product Order</span>';
-
-                const waText = encodeURIComponent(`Hello ${b.name}, this is Muhikira Darcie. Regarding your ${b.type.toLowerCase()} for "${b.item}" scheduled on ${b.date}, status is currently: ${b.status}. Thank you!`);
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
-                        <td class="p-3 font-mono font-bold text-emerald-600">${b.id}<br><span class="text-[10px] text-gray-400 font-normal">Created: ${b.created || '--'}</span></td>
-                        <td class="p-3 font-bold">${escapeHtml(b.name)}<br><span class="font-normal text-gray-500 text-[11px]">${escapeHtml(b.phone)}</span></td>
-                        <td class="p-3">${typeBadge}</td>
-                        <td class="p-3 font-semibold">${escapeHtml(b.item)}<br><span class="font-normal text-gray-400 text-[11px]">${b.amount ? formatMoney(b.amount) : ''}</span></td>
-                        <td class="p-3 text-center font-medium">${b.date}</td>
-                        <td class="p-3 text-center">${statusBadge}</td>
-                        <td class="p-3 text-center flex justify-center gap-1.5">
-                            <button onclick="editBooking('${b.id}')" class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Edit Booking"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <a href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}?text=${waText}" target="_blank" class="p-1.5 bg-emerald-500 text-white rounded hover:bg-emerald-600" title="Send WhatsApp Confirmation"><i class="fa-brands fa-whatsapp"></i></a>
-                            <button onclick="deleteBooking('${b.id}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-emerald-600">${b.id}<div class="text-[10px] text-gray-400 font-normal">Logged: ${b.created || '--'}</div></td>
+                    <td class="p-3 font-medium text-gray-900 dark:text-white">${b.name}<div class="text-[10px] text-gray-400">${b.phone}</div></td>
+                    <td class="p-3 font-semibold text-gray-700 dark:text-gray-300">${b.type}</td>
+                    <td class="p-3">${b.item}<div class="text-[10px] text-gray-400 font-bold">${b.amount ? formatMoney(b.amount) : ''}</div></td>
+                    <td class="p-3 text-center font-medium">${b.date}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badgeClass}">${b.status}</span></td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editBooking('${b.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteBooking('${b.id}')" class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        // --- STANDARD APP FUNCTIONS ---
+        // --- CLIENT FORM SUBMISSION & MANAGEMENT ---
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editingId = document.getElementById('editing-record-id').value;
+            const name = document.getElementById('entry-name').value.trim();
+            const phone = document.getElementById('entry-phone').value.trim();
+            const serviceType = document.getElementById('entry-service-type').value;
+            const service = document.getElementById('entry-service').value.trim();
+            const amount = parseFloat(document.getElementById('entry-amount').value) || 0;
+            const method = document.getElementById('entry-method').value;
+            const date = document.getElementById('entry-date').value;
+            const time = document.getElementById('entry-time').value;
+            const comment = document.getElementById('entry-comment').value.trim();
+
+            if(editingId) {
+                const idx = state.records.findIndex(r => r.id === editingId);
+                if(idx !== -1) {
+                    state.records[idx] = { ...state.records[idx], name, phone, serviceType, service, amount, method, date, time, comment };
+                    logAudit(`Updated client record ${editingId} (${name})`);
+                    showToast(`Updated client record ${editingId}`, 'success');
+                }
+            } else {
+                const dateClean = date.split('-').reverse().join('');
+                const timeClean = time.replace(':', '');
+                const id = `MDDR${dateClean}${timeClean}`;
+
+                const newRecord = { id, name, phone, serviceType, service, amount, method, date, time, comment };
+                state.records.unshift(newRecord);
+                logAudit(`Created client record ${id} for ${name}`);
+                showToast(`New client ${id} saved successfully!`, 'success');
+            }
+
+            saveState();
+            resetEntryForm();
+            switchTab('records');
+        }
+
         function editRecord(id) {
-            const record = (state.records || []).find(r => r.id === id);
-            if(!record) return;
+            const r = state.records.find(item => item.id === id);
+            if(!r) return;
 
-            document.getElementById('editing-record-id').value = record.id;
-            document.getElementById('entry-name').value = record.name;
-            document.getElementById('entry-phone').value = record.phone;
-            document.getElementById('entry-service-type').value = record.serviceType || 'IREMBO';
-            document.getElementById('entry-service').value = record.service;
-            document.getElementById('entry-amount').value = record.amount;
-            document.getElementById('entry-method').value = record.method;
-            document.getElementById('entry-date').value = record.date;
-            document.getElementById('entry-time').value = record.time;
-            document.getElementById('entry-comment').value = record.comment || '';
+            document.getElementById('editing-record-id').value = r.id;
+            document.getElementById('live-client-id').textContent = r.id;
+            document.getElementById('entry-name').value = r.name;
+            document.getElementById('entry-phone').value = r.phone;
+            document.getElementById('entry-service-type').value = r.serviceType;
+            document.getElementById('entry-service').value = r.service;
+            document.getElementById('entry-amount').value = r.amount;
+            document.getElementById('entry-method').value = r.method;
+            document.getElementById('entry-date').value = r.date;
+            document.getElementById('entry-time').value = r.time;
+            document.getElementById('entry-comment').value = r.comment || '';
 
-            document.getElementById('live-client-id').textContent = record.id;
-            document.getElementById('entry-form-title').textContent = `Edit Client Record (${record.id})`;
+            document.getElementById('entry-form-title').textContent = `Edit Client (${r.id})`;
             document.getElementById('form-submit-btn').textContent = 'Update Record';
 
             switchTab('entry');
         }
 
+        function deleteRecord(id) {
+            if(confirm(`Are you sure you want to delete record ${id}?`)) {
+                state.records = state.records.filter(r => r.id !== id);
+                saveState();
+                logAudit(`Deleted client record ${id}`);
+                showToast(`Deleted client record ${id}`, 'info');
+                refreshAllViews();
+            }
+        }
+
         function viewRecord(id) {
-            const record = (state.records || []).find(r => r.id === id);
-            if(!record) return;
+            const r = state.records.find(item => item.id === id);
+            if(!r) return;
 
-            document.getElementById('view-modal-id').textContent = record.id;
-            document.getElementById('view-modal-name').textContent = record.name;
-            document.getElementById('view-modal-phone').textContent = record.phone;
-            document.getElementById('view-modal-service-type').textContent = record.serviceType || 'IREMBO';
-            document.getElementById('view-modal-service').textContent = record.service;
-            document.getElementById('view-modal-amount').textContent = formatMoney(record.amount);
-            
-            const methodEl = document.getElementById('view-modal-method');
-            methodEl.textContent = record.method;
-            methodEl.className = `font-bold mt-0.5 block ${record.method === 'MomoPay' ? 'text-amber-500' : 'text-teal-500'}`;
-
-            document.getElementById('view-modal-datetime').textContent = `${record.date} at ${record.time}`;
-            document.getElementById('view-modal-comment').textContent = record.comment ? record.comment : 'No additional remarks provided.';
+            document.getElementById('view-modal-id').textContent = r.id;
+            document.getElementById('view-modal-name').textContent = r.name;
+            document.getElementById('view-modal-phone').textContent = r.phone;
+            document.getElementById('view-modal-service-type').textContent = r.serviceType;
+            document.getElementById('view-modal-service').textContent = r.service;
+            document.getElementById('view-modal-amount').textContent = formatMoney(r.amount);
+            document.getElementById('view-modal-method').textContent = r.method;
+            document.getElementById('view-modal-datetime').textContent = `${r.date} at ${r.time}`;
+            document.getElementById('view-modal-comment').textContent = r.comment || 'No remarks provided.';
 
             document.getElementById('view-record-modal').classList.remove('hidden');
         }
@@ -1487,55 +1780,279 @@
             document.getElementById('view-record-modal').classList.add('hidden');
         }
 
-        function handleFormSubmit(e) {
+        // --- RECORDS TABLE RENDERING & FILTERS ---
+        function renderRecordsTable() {
+            const tbody = document.getElementById('records-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const serviceFilter = document.getElementById('filter-service-type')?.value || 'ALL';
+            const payFilter = document.getElementById('filter-payment')?.value || 'ALL';
+            const sortOption = document.getElementById('sort-select')?.value || 'date-desc';
+
+            const dateFrom = document.getElementById('filter-date-from')?.value;
+            const dateTo = document.getElementById('filter-date-to')?.value;
+
+            let filtered = (state.records || []).filter(r => {
+                const matchSearch = r.id.toLowerCase().includes(searchTerm) ||
+                                    r.name.toLowerCase().includes(searchTerm) ||
+                                    r.phone.toLowerCase().includes(searchTerm) ||
+                                    r.service.toLowerCase().includes(searchTerm);
+                const matchService = serviceFilter === 'ALL' || r.serviceType === serviceFilter;
+                const matchPay = payFilter === 'ALL' || r.method === payFilter;
+                
+                let matchDate = true;
+                if(dateFrom) matchDate = matchDate && (r.date >= dateFrom);
+                if(dateTo) matchDate = matchDate && (r.date <= dateTo);
+
+                return matchSearch && matchService && matchPay && matchDate;
+            });
+
+            // Sorting logic
+            filtered.sort((a, b) => {
+                if(sortOption === 'date-desc') return (b.date + b.time).localeCompare(a.date + a.time);
+                if(sortOption === 'date-asc') return (a.date + a.time).localeCompare(b.date + b.time);
+                if(sortOption === 'amount-desc') return (b.amount - a.amount);
+                if(sortOption === 'name-asc') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            document.getElementById('records-count').textContent = filtered.length;
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-gray-400">No client records matching current filters.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono font-bold text-emerald-600">${r.id}</td>
+                    <td class="py-3 px-4 text-xs">${r.date}<div class="text-[10px] text-gray-400">${r.time}</div></td>
+                    <td class="py-3 px-4 font-bold text-gray-900 dark:text-white">${r.name}</td>
+                    <td class="py-3 px-4 text-xs font-mono">${r.phone}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${r.serviceType === 'IREMBO' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30' : 'bg-blue-500/10 text-blue-600 border border-blue-500/30'}">${r.serviceType}</span></td>
+                    <td class="py-3 px-4 text-xs max-w-xs truncate">${r.service}</td>
+                    <td class="py-3 px-4 font-bold text-emerald-600 dark:text-emerald-400">${formatMoney(r.amount)}</td>
+                    <td class="py-3 px-4 text-xs font-semibold ${r.method === 'MomoPay' ? 'text-amber-500' : 'text-teal-500'}">${r.method}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="viewRecord('${r.id}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg" title="View Full Details"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="openClientLedger('${r.name}')" class="p-1.5 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg" title="Client Ledger"><i class="fa-solid fa-book-open"></i></button>
+                            <button onclick="editRecord('${r.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord('${r.id}')" class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filter-date-from').value = '';
+            document.getElementById('filter-date-to').value = '';
+            renderRecordsTable();
+        }
+
+        // --- CLIENT LEDGER MODAL ---
+        function openClientLedger(clientName) {
+            const clientRecords = (state.records || []).filter(r => r.name.toLowerCase() === clientName.toLowerCase());
+            const totalSpend = clientRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+
+            document.getElementById('ledger-client-name').textContent = `Client Ledger: ${clientName}`;
+            document.getElementById('ledger-visits').textContent = clientRecords.length;
+            document.getElementById('ledger-spend').textContent = formatMoney(totalSpend);
+
+            const list = document.getElementById('ledger-history-list');
+            list.innerHTML = '';
+
+            if(clientRecords.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-400 p-2">No transaction history found.</p>`;
+            } else {
+                clientRecords.forEach(r => {
+                    const item = document.createElement('div');
+                    item.className = 'p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-xs flex justify-between items-center';
+                    item.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-900 dark:text-white">${r.service} (${r.serviceType})</p>
+                            <p class="text-[10px] text-gray-400">${r.date} ${r.time} • ${r.method}</p>
+                        </div>
+                        <span class="font-bold text-emerald-600">${formatMoney(r.amount)}</span>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+
+            document.getElementById('client-ledger-modal').classList.remove('hidden');
+        }
+
+        function closeLedgerModal() {
+            document.getElementById('client-ledger-modal').classList.add('hidden');
+        }
+
+        // --- CRM & CLIENT LOYALTY DIRECTORY ---
+        function renderCRMTable() {
+            const tbody = document.getElementById('crm-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            const clientMap = {};
+            (state.records || []).forEach(r => {
+                if(!clientMap[r.name]) {
+                    clientMap[r.name] = { name: r.name, phone: r.phone, visits: 0, spend: 0 };
+                }
+                clientMap[r.name].visits += 1;
+                clientMap[r.name].spend += (parseFloat(r.amount) || 0);
+            });
+
+            const clients = Object.values(clientMap).sort((a,b) => b.spend - a.spend);
+
+            if(clients.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No client loyalty data registered yet.</td></tr>`;
+                return;
+            }
+
+            clients.forEach(c => {
+                let tier = 'Standard';
+                let badgeClass = 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300';
+                if(c.spend >= 50000 || c.visits >= 5) {
+                    tier = 'VIP Platinum';
+                    badgeClass = 'bg-amber-500/10 text-amber-500 border border-amber-500/30';
+                } else if(c.spend >= 20000 || c.visits >= 3) {
+                    tier = 'Gold Member';
+                    badgeClass = 'bg-blue-500/10 text-blue-500 border border-blue-500/30';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-gray-900 dark:text-white">${c.name}</td>
+                    <td class="p-3 font-mono text-gray-500">${c.phone}</td>
+                    <td class="p-3 font-semibold">${c.visits} visit(s)</td>
+                    <td class="p-3 text-right font-bold text-emerald-600">${formatMoney(c.spend)}</td>
+                    <td class="p-3 text-center"><span class="px-2.5 py-0.5 text-[10px] font-extrabold rounded-full ${badgeClass}">${tier}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- INVENTORY MANAGEMENT ---
+        function handleInventorySubmit(e) {
             e.preventDefault();
-            const editingId = document.getElementById('editing-record-id').value;
-            const date = document.getElementById('entry-date').value;
-            const time = document.getElementById('entry-time').value;
+            const editingId = document.getElementById('editing-inv-id').value;
+            const name = document.getElementById('inv-item-name').value.trim();
+            const type = document.getElementById('inv-item-type').value;
+            const qty = parseInt(document.getElementById('inv-item-qty').value, 10) || 0;
 
-            if(!state.records) state.records = [];
+            if(!state.inventory) state.inventory = [];
 
-            if (editingId) {
-                const idx = state.records.findIndex(r => r.id === editingId);
-                if (idx !== -1) {
-                    state.records[idx] = {
-                        ...state.records[idx],
-                        name: document.getElementById('entry-name').value.trim(),
-                        phone: document.getElementById('entry-phone').value.trim(),
-                        serviceType: document.getElementById('entry-service-type').value,
-                        service: document.getElementById('entry-service').value.trim(),
-                        amount: parseFloat(document.getElementById('entry-amount').value) || 0,
-                        method: document.getElementById('entry-method').value,
-                        date,
-                        time,
-                        comment: document.getElementById('entry-comment').value.trim()
-                    };
-                    logAudit(`Updated client record ${editingId}`);
+            if(editingId) {
+                const idx = state.inventory.findIndex(item => item.id === editingId);
+                if(idx !== -1) {
+                    state.inventory[idx] = { ...state.inventory[idx], name, type, qty };
+                    logAudit(`Updated inventory item ${name}`);
+                    showToast(`Updated item ${name}`, 'success');
                 }
             } else {
-                const id = `MDDR${date.split('-').reverse().join('')}${time.replace(':','')}`;
-                const record = {
-                    id,
-                    name: document.getElementById('entry-name').value.trim(),
-                    phone: document.getElementById('entry-phone').value.trim(),
-                    serviceType: document.getElementById('entry-service-type').value,
-                    service: document.getElementById('entry-service').value.trim(),
-                    amount: parseFloat(document.getElementById('entry-amount').value) || 0,
-                    method: document.getElementById('entry-method').value,
-                    date,
-                    time,
-                    comment: document.getElementById('entry-comment').value.trim()
-                };
-                state.records.unshift(record);
-                logAudit(`Added client record ${id} for ${record.name} (${record.serviceType})`);
+                const id = 'INV-' + Date.now().toString().slice(-6);
+                state.inventory.unshift({ id, name, type, qty });
+                logAudit(`Added new stock item ${name} (Qty: ${qty})`);
+                showToast(`Added ${name} to stock`, 'success');
             }
 
             saveState();
-            resetEntryForm();
-            refreshAllViews();
-            switchTab('records');
+            resetInventoryForm();
+            renderInventoryTable();
         }
 
+        function resetInventoryForm() {
+            document.getElementById('editing-inv-id').value = '';
+            document.getElementById('inventory-form').reset();
+            document.getElementById('inv-submit-btn').textContent = 'Add Item';
+            document.getElementById('inv-cancel-btn').classList.add('hidden');
+        }
+
+        function editInventory(id) {
+            const item = (state.inventory || []).find(i => i.id === id);
+            if(!item) return;
+
+            document.getElementById('editing-inv-id').value = item.id;
+            document.getElementById('inv-item-name').value = item.name;
+            document.getElementById('inv-item-type').value = item.type;
+            document.getElementById('inv-item-qty').value = item.qty;
+
+            document.getElementById('inv-submit-btn').textContent = 'Update Item';
+            document.getElementById('inv-cancel-btn').classList.remove('hidden');
+        }
+
+        function adjustStock(id, delta) {
+            const item = (state.inventory || []).find(i => i.id === id);
+            if(!item) return;
+            item.qty = Math.max(0, item.qty + delta);
+            saveState();
+            renderInventoryTable();
+        }
+
+        function deleteInventory(id) {
+            if(confirm("Remove this item from inventory?")) {
+                state.inventory = (state.inventory || []).filter(i => i.id !== id);
+                saveState();
+                renderInventoryTable();
+                logAudit(`Deleted inventory item ${id}`);
+                showToast(`Removed stock item`, 'info');
+            }
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventory-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            let lowStockCount = 0;
+            (state.inventory || []).forEach(i => {
+                if(i.qty <= 5) lowStockCount++;
+
+                let statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-600">In Stock</span>';
+                if(i.qty === 0) statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-500/10 text-red-600">Out of Stock</span>';
+                else if(i.qty <= 5) statusBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/10 text-amber-600">Low Stock</span>';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-gray-900 dark:text-white">${i.name}</td>
+                    <td class="p-3 text-center text-gray-500">${i.type}</td>
+                    <td class="p-3 text-center font-black text-sm">${i.qty}</td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="adjustStock('${i.id}', -1)" class="w-6 h-6 rounded bg-red-100 dark:bg-red-900/30 text-red-600 font-bold hover:bg-red-200 text-xs">-1</button>
+                            <button onclick="adjustStock('${i.id}', 1)" class="w-6 h-6 rounded bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 font-bold hover:bg-emerald-200 text-xs">+1</button>
+                        </div>
+                    </td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editInventory('${i.id}')" class="text-blue-600 hover:text-blue-700 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteInventory('${i.id}')" class="text-red-600 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const banner = document.getElementById('low-stock-alert-banner');
+            if(banner) {
+                if(lowStockCount > 0) {
+                    banner.classList.remove('hidden');
+                    document.getElementById('low-stock-count-badge').textContent = `${lowStockCount} item(s) low on stock!`;
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+        }
+
+        // --- EXPENSES MANAGEMENT ---
         function handleExpenseSubmit(e) {
             e.preventDefault();
             const editingId = document.getElementById('editing-expense-id').value;
@@ -1545,718 +2062,380 @@
 
             if(!state.expenses) state.expenses = [];
 
-            if (editingId) {
-                const idx = state.expenses.findIndex(ex => ex.id === editingId);
-                if (idx !== -1) {
+            if(editingId) {
+                const idx = state.expenses.findIndex(exp => exp.id === editingId);
+                if(idx !== -1) {
                     state.expenses[idx] = { ...state.expenses[idx], date, title, amount };
-                    logAudit(`Updated expense: ${title} (${amount})`);
+                    logAudit(`Updated expense item ${editingId} (${title})`);
+                    showToast(`Updated expense ${title}`, 'success');
                 }
             } else {
-                const exp = {
-                    id: 'EXP-' + Date.now().toString().slice(-6),
-                    date,
-                    title,
-                    amount
-                };
-                state.expenses.unshift(exp);
-                logAudit(`Added expense: ${exp.title} (${exp.amount})`);
+                const id = 'EXP-' + Date.now().toString().slice(-6);
+                state.expenses.unshift({ id, date, title, amount });
+                logAudit(`Added expense outlay ${title} (${amount} RWF)`);
+                showToast(`Recorded expense ${title}`, 'success');
             }
 
             saveState();
+            resetExpenseForm();
             renderExpensesTable();
             renderDashboard();
-            renderTaxAnalytics();
-            resetExpenseForm();
-        }
-
-        function editExpense(idx) {
-            const ex = (state.expenses || [])[idx];
-            if(!ex) return;
-            document.getElementById('editing-expense-id').value = ex.id;
-            document.getElementById('expense-date').value = ex.date;
-            document.getElementById('expense-title').value = ex.title;
-            document.getElementById('expense-amount').value = ex.amount;
-            document.getElementById('expense-submit-btn').textContent = 'Update';
-            document.getElementById('expense-cancel-btn').classList.remove('hidden');
         }
 
         function resetExpenseForm() {
-            document.getElementById('expense-form').reset();
             document.getElementById('editing-expense-id').value = '';
+            document.getElementById('expense-form').reset();
             document.getElementById('expense-submit-btn').textContent = 'Add';
             document.getElementById('expense-cancel-btn').classList.add('hidden');
             setDefaultDateTime();
         }
 
-        // --- INVENTORY MANAGEMENT ---
-        function handleInventorySubmit(e) {
-            e.preventDefault();
-            const editingId = document.getElementById('editing-inv-id').value;
-            const name = document.getElementById('inv-item-name').value.trim();
-            const type = document.getElementById('inv-item-type').value;
-            const qty = parseInt(document.getElementById('inv-item-qty').value) || 0;
+        function editExpense(id) {
+            const exp = (state.expenses || []).find(e => e.id === id);
+            if(!exp) return;
 
-            if(!state.inventory) state.inventory = [];
+            document.getElementById('editing-expense-id').value = exp.id;
+            document.getElementById('expense-date').value = exp.date;
+            document.getElementById('expense-title').value = exp.title;
+            document.getElementById('expense-amount').value = exp.amount;
 
-            if (editingId) {
-                const idx = state.inventory.findIndex(item => item.id === editingId);
-                if (idx !== -1) {
-                    state.inventory[idx] = { ...state.inventory[idx], name, type, qty };
-                    logAudit(`Updated inventory item: ${name} (${type}, ${qty} units)`);
-                    showToast(`Updated ${name} successfully.`, 'success');
-                }
-            } else {
-                const inv = {
-                    id: 'INV-' + Date.now().toString().slice(-6),
-                    name,
-                    type,
-                    qty
-                };
-                state.inventory.unshift(inv);
-                logAudit(`Added inventory item: ${inv.name} (${type}, ${inv.qty} units)`);
-                showToast(`Added new item: ${name} (${type})`, 'success');
+            document.getElementById('expense-submit-btn').textContent = 'Update';
+            document.getElementById('expense-cancel-btn').classList.remove('hidden');
+        }
+
+        function deleteExpense(id) {
+            if(confirm("Delete this expense record?")) {
+                state.expenses = (state.expenses || []).filter(e => e.id !== id);
+                saveState();
+                renderExpensesTable();
+                renderDashboard();
+                logAudit(`Deleted expense ${id}`);
+                showToast(`Deleted expense`, 'info');
             }
-
-            saveState();
-            renderInventoryTable();
-            resetInventoryForm();
-        }
-
-        function adjustInventoryQty(idx, amount) {
-            const item = (state.inventory || [])[idx];
-            if (!item) return;
-
-            const newQty = item.qty + amount;
-            if (newQty < 0) {
-                showToast(`Cannot reduce stock below 0 for ${item.name}!`, 'alert');
-                return;
-            }
-
-            item.qty = newQty;
-            const itemType = item.type || 'Piece(s)';
-            const actionType = amount > 0 ? 'Bought (+)' : 'Sold (-)';
-            logAudit(`Adjusted ${item.name} (${itemType}): ${actionType} ${Math.abs(amount)} unit(s). New Qty: ${newQty}`);
-            
-            const isNowLow = itemType === 'Package(s)' ? (newQty <= 0) : (newQty <= 5);
-            if (isNowLow) {
-                const alertMsg = itemType === 'Package(s)' 
-                    ? `Warning: Package item "${item.name}" has reached 0!` 
-                    : `Low Stock Alert: ${item.name} is down to ${newQty} units!`;
-                showToast(alertMsg, 'alert');
-            } else {
-                showToast(`Stock updated: ${item.name} is now at ${newQty} units.`, 'info');
-            }
-
-            saveState();
-            renderInventoryTable();
-        }
-
-        function editInventory(idx) {
-            const item = (state.inventory || [])[idx];
-            if(!item) return;
-            document.getElementById('editing-inv-id').value = item.id;
-            document.getElementById('inv-item-name').value = item.name;
-            document.getElementById('inv-item-type').value = item.type || 'Piece(s)';
-            document.getElementById('inv-item-qty').value = item.qty;
-            document.getElementById('inv-submit-btn').textContent = 'Update Item';
-            document.getElementById('inv-cancel-btn').classList.remove('hidden');
-        }
-
-        function resetInventoryForm() {
-            document.getElementById('inventory-form').reset();
-            document.getElementById('editing-inv-id').value = '';
-            document.getElementById('inv-submit-btn').textContent = 'Add Item';
-            document.getElementById('inv-cancel-btn').classList.add('hidden');
-        }
-
-        function renderInventoryTable() {
-            const tbody = document.getElementById('inventory-table-body');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-
-            let lowStockCount = 0;
-
-            (state.inventory || []).forEach((item, idx) => {
-                const itemType = item.type || 'Piece(s)';
-                const isLow = itemType === 'Package(s)' ? (item.qty <= 0) : (item.qty <= 5);
-                if(isLow) lowStockCount++;
-
-                const statusBadge = isLow 
-                    ? (itemType === 'Package(s)'
-                        ? '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Reached 0 ⚠️</span>'
-                        : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">Low Stock ⚠️</span>')
-                    : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">In Stock</span>';
-                
-                const typeBadgeClass = itemType === 'Package(s)' 
-                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' 
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300';
-
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-100 dark:border-gray-800 ${isLow ? 'bg-red-500/5 dark:bg-red-500/10' : ''}">
-                        <td class="p-3 font-semibold">${escapeHtml(item.name)}</td>
-                        <td class="p-3 text-center"><span class="px-2 py-0.5 text-[10px] font-bold rounded ${typeBadgeClass}">${itemType}</span></td>
-                        <td class="p-3 text-center font-bold text-sm">${item.qty}</td>
-                        <td class="p-3 text-center">
-                            <div class="inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl shadow-inner">
-                                <button onclick="adjustInventoryQty(${idx}, -1)" class="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Minus 1 (Sold)"><i class="fa-solid fa-minus"></i></button>
-                                <span class="px-2 text-[10px] text-gray-400 font-bold uppercase">Qty</span>
-                                <button onclick="adjustInventoryQty(${idx}, 1)" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Plus 1 (Bought)"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                        </td>
-                        <td class="p-3 text-center">${statusBadge}</td>
-                        <td class="p-3 text-center flex justify-center gap-2">
-                            <button onclick="editInventory(${idx})" class="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-800 rounded" title="Edit Item"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteInventory(${idx})" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-gray-800 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            const banner = document.getElementById('low-stock-alert-banner');
-            const countBadge = document.getElementById('low-stock-count-badge');
-            if(banner && countBadge) {
-                if(lowStockCount > 0) {
-                    banner.classList.remove('hidden');
-                    countBadge.textContent = `${lowStockCount} item(s) require attention (Package at 0 / Piece low)!`;
-                } else {
-                    banner.classList.add('hidden');
-                }
-            }
-        }
-
-        function deleteInventory(idx) {
-            const itemName = (state.inventory || [])[idx]?.name || 'Item';
-            state.inventory.splice(idx, 1);
-            saveState();
-            renderInventoryTable();
-            logAudit(`Removed inventory item: ${itemName}`);
-            showToast(`Removed item: ${itemName}`, 'info');
-        }
-
-        function renderCRMTable() {
-            const tbody = document.getElementById('crm-table-body');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-
-            const clientsMap = {};
-            (state.records || []).forEach(r => {
-                const key = r.name.toLowerCase();
-                if(!clientsMap[key]) {
-                    clientsMap[key] = { name: r.name, phone: r.phone, visits: 0, totalSpend: 0 };
-                }
-                clientsMap[key].visits += 1;
-                clientsMap[key].totalSpend += r.amount;
-            });
-
-            Object.values(clientsMap).forEach(c => {
-                let tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-gray-100 text-gray-700">Standard</span>';
-                if(c.totalSpend >= 500000 || c.visits >= 5) {
-                    tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-purple-100 text-purple-700"><i class="fa-solid fa-crown mr-1"></i> VIP Client</span>';
-                } else if(c.visits >= 2) {
-                    tier = '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-700">Regular</span>';
-                }
-
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="p-3 font-bold">${escapeHtml(c.name)}</td>
-                        <td class="p-3">${escapeHtml(c.phone)}</td>
-                        <td class="p-3 font-semibold">${c.visits}</td>
-                        <td class="p-3 text-right font-black text-emerald-600">${formatMoney(c.totalSpend)}</td>
-                        <td class="p-3 text-center">${tier}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderTaxAnalytics() {
-            let totalRev = 0, totalExp = 0;
-            (state.records || []).forEach(r => totalRev += r.amount);
-            (state.expenses || []).forEach(e => totalExp += e.amount);
-            const netProfit = totalRev - totalExp;
-            const estimatedTax = netProfit > 0 ? netProfit * 0.15 : 0;
-            const postTax = netProfit - estimatedTax;
-
-            document.getElementById('tax-gross-rev').textContent = formatMoney(totalRev);
-            document.getElementById('tax-estimated-due').textContent = formatMoney(estimatedTax);
-            document.getElementById('tax-post-net').textContent = formatMoney(postTax);
         }
 
         function renderExpensesTable() {
             const tbody = document.getElementById('expenses-table-body');
             if(!tbody) return;
             tbody.innerHTML = '';
-            (state.expenses || []).forEach((ex, idx) => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="p-3">${ex.date}</td>
-                        <td class="p-3 font-semibold">${escapeHtml(ex.title)}</td>
-                        <td class="p-3 text-right font-bold text-red-500">${formatMoney(ex.amount)}</td>
-                        <td class="p-3 text-center flex justify-center gap-2">
-                            <button onclick="editExpense(${idx})" class="p-1.5 text-blue-500 hover:bg-blue-50 rounded" title="Edit Expense"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteExpense(${idx})" class="p-1.5 text-red-500 hover:bg-red-50 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
+
+            if((state.expenses || []).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No petty cash or expenses recorded.</td></tr>`;
+                return;
+            }
+
+            state.expenses.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 text-gray-500 font-medium">${e.date}</td>
+                    <td class="p-3 font-bold text-gray-900 dark:text-white">${e.title}</td>
+                    <td class="p-3 text-right font-black text-red-500">${formatMoney(e.amount)}</td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editExpense('${e.id}')" class="text-blue-600 hover:text-blue-700 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteExpense('${e.id}')" class="text-red-600 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
         }
 
-        function deleteExpense(idx) {
-            const exTitle = (state.expenses || [])[idx]?.title || 'Expense';
-            state.expenses.splice(idx, 1);
-            saveState();
-            renderExpensesTable();
-            renderDashboard();
-            renderTaxAnalytics();
-            logAudit(`Deleted expense: ${exTitle}`);
-        }
-
-        function renderRecordsTable() {
-            const tbody = document.getElementById('records-table-body');
-            if(!tbody) return;
-            tbody.innerHTML = '';
-
-            const searchTerm = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
-            const serviceTypeFilter = document.getElementById('filter-service-type')?.value || 'ALL';
-            const paymentFilter = document.getElementById('filter-payment')?.value || 'ALL';
-            const sortOption = document.getElementById('sort-select')?.value || 'date-desc';
-            const dateFrom = document.getElementById('filter-date-from')?.value || '';
-            const dateTo = document.getElementById('filter-date-to')?.value || '';
-
-            let filtered = (state.records || []).filter(r => {
-                const matchSearch = r.id.toLowerCase().includes(searchTerm) ||
-                                    r.name.toLowerCase().includes(searchTerm) ||
-                                    r.phone.toLowerCase().includes(searchTerm) ||
-                                    r.service.toLowerCase().includes(searchTerm);
-                const sType = r.serviceType || 'IREMBO';
-                const matchServiceType = serviceTypeFilter === 'ALL' || sType === serviceTypeFilter;
-                const matchPayment = paymentFilter === 'ALL' || r.method === paymentFilter;
-                let matchDate = true;
-                if(dateFrom && r.date < dateFrom) matchDate = false;
-                if(dateTo && r.date > dateTo) matchDate = false;
-                return matchSearch && matchServiceType && matchPayment && matchDate;
+        // --- TAX & FINANCIAL ANALYTICS ---
+        function renderTaxAnalytics() {
+            const records = state.records || [];
+            const totalRev = records.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const totalExp = (state.expenses || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+            const netBeforeTax = Math.max(0, totalRev - totalExp);
+            const rateInput = document.getElementById('tax-rate-input');
+            const rate = Math.min(100, Math.max(0, parseFloat(rateInput?.value) || 0));
+            const estTax = netBeforeTax * rate / 100;
+            const postTaxNet = netBeforeTax - estTax;
+            const margin = totalRev > 0 ? (netBeforeTax / totalRev) * 100 : 0;
+            const setText = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+            setText('tax-gross-rev', formatMoney(totalRev));
+            setText('tax-total-expenses', formatMoney(totalExp));
+            setText('tax-estimated-due', formatMoney(estTax));
+            setText('tax-post-net', formatMoney(postTaxNet));
+            setText('tax-pre-net', formatMoney(netBeforeTax));
+            setText('tax-net-margin', `${margin.toFixed(1)}%`);
+            setText('tax-revenue-after-expenses', formatMoney(netBeforeTax));
+            setText('tax-service-total', formatMoney(totalRev));
+            const bar = document.getElementById('tax-margin-bar');
+            if(bar) { bar.style.width = `${Math.min(100, Math.max(0, margin))}%`; bar.className = `h-full rounded-full transition-all ${margin < 20 ? 'bg-amber-500' : 'bg-emerald-500'}`; }
+            const groups = {};
+            records.forEach(r => {
+                const key = r.serviceType === 'IREMBO' || r.serviceType === 'IT' ? r.serviceType : (r.service_type || r.serviceCategory || 'Other');
+                if(!groups[key]) groups[key] = {count:0, revenue:0};
+                groups[key].count++;
+                groups[key].revenue += parseFloat(r.amount) || 0;
             });
-
-            filtered.sort((a, b) => {
-                if(sortOption === 'date-desc') return `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`);
-                if(sortOption === 'date-asc') return `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
-                if(sortOption === 'amount-desc') return b.amount - a.amount;
-                if(sortOption === 'name-asc') return a.name.localeCompare(b.name);
-                return 0;
-            });
-
-            const countEl = document.getElementById('records-count');
-            if(countEl) countEl.textContent = filtered.length;
-
-            filtered.forEach(r => {
-                const sType = r.serviceType || 'IREMBO';
-                const sTypeBadge = sType === 'IREMBO' 
-                    ? '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">IREMBO</span>'
-                    : '<span class="px-2 py-0.5 text-[11px] font-bold rounded bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">IT</span>';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
-                        <td class="py-3 px-4 font-mono font-bold text-emerald-600">${r.id}</td>
-                        <td class="py-3 px-4 text-xs">${r.date} ${r.time}</td>
-                        <td class="py-3 px-4 font-bold cursor-pointer hover:underline text-blue-500" onclick="openClientLedger('${r.name}')">${escapeHtml(r.name)}</td>
-                        <td class="py-3 px-4 text-xs">${escapeHtml(r.phone)}</td>
-                        <td class="py-3 px-4">${sTypeBadge}</td>
-                        <td class="py-3 px-4 text-xs">${escapeHtml(r.service)}</td>
-                        <td class="py-3 px-4 font-extrabold">${formatMoney(r.amount)}</td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 text-[11px] font-bold rounded-full ${r.method==='MomoPay'?'bg-amber-100 text-amber-800':'bg-teal-100 text-teal-800'}">${r.method}</span></td>
-                        <td class="py-3 px-4 text-center flex justify-center gap-2">
-                            <button onclick="viewRecord('${r.id}')" class="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg" title="View Full Record Information"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="editRecord('${r.id}')" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg" title="Edit Record"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteRecord('${r.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function clearDateFilter() {
-            if(document.getElementById('filter-date-from')) document.getElementById('filter-date-from').value = '';
-            if(document.getElementById('filter-date-to')) document.getElementById('filter-date-to').value = '';
-            renderRecordsTable();
-        }
-
-        function deleteRecord(id) {
-            if(confirm(`Delete record ${id}?`)) {
-                state.records = (state.records || []).filter(r => r.id !== id);
-                logAudit(`Deleted client record ${id}`);
-                saveState();
-                refreshAllViews();
-            }
-        }
-
-        function openClientLedger(name) {
-            const clientRecs = (state.records || []).filter(r => r.name.toLowerCase() === name.toLowerCase());
-            let total = 0;
-            clientRecs.forEach(r => total += r.amount);
-
-            document.getElementById('ledger-client-name').textContent = `Ledger: ${name}`;
-            document.getElementById('ledger-visits').textContent = clientRecs.length;
-            document.getElementById('ledger-spend').textContent = formatMoney(total);
-
-            const list = document.getElementById('ledger-history-list');
-            list.innerHTML = '';
-            clientRecs.forEach(r => {
-                const sType = r.serviceType || 'IREMBO';
-                list.innerHTML += `<div class="p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl flex justify-between text-xs"><span>${r.date} [${sType}] - ${r.service}</span><span class="font-bold">${formatMoney(r.amount)}</span></div>`;
-            });
-            document.getElementById('client-ledger-modal').classList.remove('hidden');
-        }
-
-        function closeLedgerModal() {
-            document.getElementById('client-ledger-modal').classList.add('hidden');
-        }
-
-        function renderDashboard() {
-            const period = document.getElementById('dashboard-period-filter')?.value || 'all';
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            let filtered = state.records || [];
-            if (period === 'today') {
-                filtered = (state.records || []).filter(r => r.date === todayStr);
-            } else if (period === 'week') {
-                const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-                filtered = (state.records || []).filter(r => r.date >= weekAgo);
-            } else if (period === 'month') {
-                const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
-                filtered = (state.records || []).filter(r => r.date >= monthAgo);
-            }
-
-            let totalRev = 0, momoRev = 0, cashRev = 0, totalExp = 0;
-            filtered.forEach(r => {
-                totalRev += r.amount;
-                if(r.method === 'MomoPay') momoRev += r.amount;
-                if(r.method === 'Cash') cashRev += r.amount;
-            });
-            (state.expenses || []).forEach(e => totalExp += e.amount);
-            const netProfit = totalRev - totalExp;
-
-            document.getElementById('dash-total-revenue').textContent = formatMoney(totalRev);
-            document.getElementById('dash-revenue-sub').textContent = `${filtered.length} sales`;
-            document.getElementById('dash-total-expenses').textContent = formatMoney(totalExp);
-            document.getElementById('dash-net-profit').textContent = formatMoney(netProfit);
-            document.getElementById('dash-total-clients').textContent = filtered.length;
-            document.getElementById('dash-momopay-total').textContent = formatMoney(momoRev);
-            document.getElementById('dash-momopay-pct').textContent = totalRev > 0 ? `${((momoRev/totalRev)*100).toFixed(0)}%` : '0%';
-            document.getElementById('dash-cash-total').textContent = formatMoney(cashRev);
-            document.getElementById('dash-cash-pct').textContent = totalRev > 0 ? `${((cashRev/totalRev)*100).toFixed(0)}%` : '0%';
-
-            renderCharts(filtered);
-        }
-
-        function renderCharts(filteredRecords) {
-            const ctx1 = document.getElementById('chart-revenue-timeline')?.getContext('2d');
-            if(ctx1) {
-                if(revenueChart) revenueChart.destroy();
-                const dates = [...new Set(filteredRecords.map(r => r.date))].sort();
-                const revVals = dates.map(d => filteredRecords.filter(r => r.date === d).reduce((acc, curr) => acc + curr.amount, 0));
-
-                revenueChart = new Chart(ctx1, {
-                    type: 'line',
-                    data: {
-                        labels: dates.length ? dates : ['Today'],
-                        datasets: [{
-                            label: 'Revenue Trend',
-                            data: revVals.length ? revVals : [0],
-                            borderColor: '#22c55e',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-
-            const ctx2 = document.getElementById('chart-peak-hours')?.getContext('2d');
-            if(ctx2) {
-                if(peakChart) peakChart.destroy();
-                const hours = Array(24).fill(0);
-                filteredRecords.forEach(r => {
-                    const h = parseInt(r.time.split(':')[0]) || 0;
-                    hours[h]++;
-                });
-
-                peakChart = new Chart(ctx2, {
-                    type: 'bar',
-                    data: {
-                        labels: hours.map((_, i) => `${i}:00`),
-                        datasets: [{ label: 'Transactions', data: hours, backgroundColor: '#3b82f6' }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
+            const tbody = document.getElementById('tax-service-breakdown');
+            if(tbody) {
+                tbody.innerHTML = '';
+                const entries = Object.entries(groups).sort((a,b) => b[1].revenue-a[1].revenue);
+                if(!entries.length) tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-gray-400">No transaction data available yet.</td></tr>';
+                entries.forEach(([name, data]) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="py-2 font-semibold">${String(name).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</td><td class="py-2 text-right">${data.count}</td><td class="py-2 text-right font-semibold">${formatMoney(data.revenue)}</td><td class="py-2 text-right">${totalRev ? (data.revenue/totalRev*100).toFixed(1) : '0.0'}%</td>`;
+                    tbody.appendChild(tr);
                 });
             }
         }
 
-        function applyReportPreset(preset) {
-            const customDateContainer = document.getElementById('report-custom-date-container');
-            if(preset === 'custom') {
-                if(customDateContainer) customDateContainer.classList.remove('hidden');
+        // --- REPORT PREVIEW & EXPORT PDF ---
+        function applyReportPreset(val) {
+            const customDateBox = document.getElementById('report-custom-date-container');
+            if(val === 'custom') {
+                if(customDateBox) customDateBox.classList.remove('hidden');
             } else {
-                if(customDateContainer) customDateContainer.classList.add('hidden');
+                if(customDateBox) customDateBox.classList.add('hidden');
             }
-
-            const todayStr = new Date().toISOString().split('T')[0];
-            let filtered = state.records || [];
-            
-            if(preset === 'today') {
-                filtered = (state.records || []).filter(r => r.date === todayStr);
-            } else if(preset === 'week') {
-                const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-                filtered = (state.records || []).filter(r => r.date >= weekAgo);
-            } else if(preset === 'month') {
-                const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
-                filtered = (state.records || []).filter(r => r.date >= monthAgo);
-            } else if(preset === 'custom') {
-                const fromVal = document.getElementById('report-date-from')?.value || '';
-                const toVal = document.getElementById('report-date-to')?.value || '';
-                filtered = (state.records || []).filter(r => {
-                    let ok = true;
-                    if(fromVal && r.date < fromVal) ok = false;
-                    if(toVal && r.date > toVal) ok = false;
-                    return ok;
-                });
-            }
-            renderReportPreview(filtered);
+            renderReportPreview();
         }
 
-        function renderReportPreview(filteredRecords = null) {
+        function renderReportPreview() {
             const preset = document.getElementById('report-preset')?.value || 'today';
-            if(!filteredRecords) {
-                const todayStr = new Date().toISOString().split('T')[0];
-                if(preset === 'today') {
-                    filteredRecords = (state.records || []).filter(r => r.date === todayStr);
-                } else if(preset === 'week') {
-                    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
-                    filteredRecords = (state.records || []).filter(r => r.date >= weekAgo);
-                } else if(preset === 'month') {
-                    const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
-                    filteredRecords = (state.records || []).filter(r => r.date >= monthAgo);
-                } else if(preset === 'custom') {
-                    const fromVal = document.getElementById('report-date-from')?.value || '';
-                    const toVal = document.getElementById('report-date-to')?.value || '';
-                    filteredRecords = (state.records || []).filter(r => {
-                        let ok = true;
-                        if(fromVal && r.date < fromVal) ok = false;
-                        if(toVal && r.date > toVal) ok = false;
-                        return ok;
-                    });
-                } else {
-                    filteredRecords = state.records || [];
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let reportRecords = state.records || [];
+            let reportExpenses = state.expenses || [];
+
+            if(preset === 'today') {
+                reportRecords = reportRecords.filter(r => r.date === todayStr);
+                reportExpenses = reportExpenses.filter(e => e.date === todayStr);
+            } else if(preset === 'week') {
+                const now = new Date();
+                const weekAgo = new Date(now.setDate(now.getDate() - 7)).toISOString().split('T')[0];
+                reportRecords = reportRecords.filter(r => r.date >= weekAgo);
+                reportExpenses = reportExpenses.filter(e => e.date >= weekAgo);
+            } else if(preset === 'month') {
+                const now = new Date();
+                const monthAgo = new Date(now.setMonth(now.getMonth() - 1)).toISOString().split('T')[0];
+                reportRecords = reportRecords.filter(r => r.date >= monthAgo);
+                reportExpenses = reportExpenses.filter(e => e.date >= monthAgo);
+            } else if(preset === 'custom') {
+                const dateFrom = document.getElementById('report-date-from')?.value;
+                const dateTo = document.getElementById('report-date-to')?.value;
+                if(dateFrom) {
+                    reportRecords = reportRecords.filter(r => r.date >= dateFrom);
+                    reportExpenses = reportExpenses.filter(e => e.date >= dateFrom);
+                }
+                if(dateTo) {
+                    reportRecords = reportRecords.filter(r => r.date <= dateTo);
+                    reportExpenses = reportExpenses.filter(e => e.date <= dateTo);
                 }
             }
 
-            let totalRev = 0, totalExp = 0;
-            filteredRecords.forEach(r => totalRev += r.amount);
-            (state.expenses || []).forEach(e => totalExp += e.amount);
+            const customMemo = document.getElementById('report-custom-memo')?.value || 'Official Financial Statement';
+            const customAuthor = document.getElementById('report-custom-author')?.value || 'Muhikira Darcie';
 
+            document.getElementById('pdf-header-subtitle').textContent = customMemo;
+            document.getElementById('pdf-footer-author').textContent = customAuthor;
             document.getElementById('pdf-generated-at').textContent = new Date().toLocaleString();
+
+            const totalRev = reportRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const totalExp = reportExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+            const netProf = totalRev - totalExp;
+
             document.getElementById('pdf-total-rev').textContent = formatMoney(totalRev);
             document.getElementById('pdf-total-exp').textContent = formatMoney(totalExp);
-            document.getElementById('pdf-net-prof').textContent = formatMoney(totalRev - totalExp);
+            document.getElementById('pdf-net-prof').textContent = formatMoney(netProf);
 
-            const customMemo = document.getElementById('report-custom-memo')?.value || 'Official Operations & Financial Statement';
-            const customAuthor = document.getElementById('report-custom-author')?.value || 'Muhikira Darcie (Enterprise Admin)';
-            
-            if(document.getElementById('pdf-header-subtitle')) document.getElementById('pdf-header-subtitle').textContent = customMemo;
-            if(document.getElementById('pdf-footer-author')) document.getElementById('pdf-footer-author').textContent = customAuthor;
-
-            // Separate Irembo vs IT records
-            let iremboRecs = filteredRecords.filter(r => (r.serviceType || 'IREMBO') === 'IREMBO');
-            let itRecs = filteredRecords.filter(r => r.serviceType === 'IT');
-
-            let iremboTotal = 0;
-            iremboRecs.forEach(r => iremboTotal += r.amount);
-
-            let itTotal = 0;
-            itRecs.forEach(r => itTotal += r.amount);
-
+            // Populate IREMBO Table
+            const iremboRecords = reportRecords.filter(r => r.serviceType === 'IREMBO');
+            const iremboTotal = iremboRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
             document.getElementById('pdf-irembo-total').textContent = formatMoney(iremboTotal);
-            document.getElementById('pdf-it-total').textContent = formatMoney(itTotal);
 
             const iremboTbody = document.getElementById('pdf-irembo-tbody');
-            const itTbody = document.getElementById('pdf-it-tbody');
-
-            if(iremboTbody) {
-                iremboTbody.innerHTML = '';
-                if(iremboRecs.length === 0) {
-                    iremboTbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-gray-400 italic">No Irembo services recorded.</td></tr>`;
-                } else {
-                    iremboRecs.forEach(r => {
-                        iremboTbody.innerHTML += `
-                            <tr class="border-b border-gray-100">
-                                <td class="py-2 px-2 font-bold text-gray-900">${escapeHtml(r.name)}</td>
-                                <td class="py-2 px-2 text-gray-600">${escapeHtml(r.service)}</td>
-                                <td class="py-2 px-2 text-right font-black text-emerald-600">${formatMoney(r.amount)}</td>
-                            </tr>
-                        `;
-                    });
-                }
+            iremboTbody.innerHTML = '';
+            if(iremboRecords.length === 0) {
+                iremboTbody.innerHTML = `<tr><td colspan="3" class="py-2 px-2 text-center text-gray-400">No IREMBO records.</td></tr>`;
+            } else {
+                iremboRecords.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-1.5 px-2 font-semibold">${r.name}</td>
+                        <td class="py-1.5 px-2 text-gray-600 whitespace-normal break-words">${r.service}</td>
+                        <td class="py-1.5 px-2 text-right font-bold text-emerald-600">${formatMoney(r.amount)}</td>
+                    `;
+                    iremboTbody.appendChild(tr);
+                });
             }
 
-            if(itTbody) {
-                itTbody.innerHTML = '';
-                if(itRecs.length === 0) {
-                    itTbody.innerHTML = `<tr><td colspan="3" class="py-3 text-center text-gray-400 italic">No IT services recorded.</td></tr>`;
-                } else {
-                    itRecs.forEach(r => {
-                        itTbody.innerHTML += `
-                            <tr class="border-b border-gray-100">
-                                <td class="py-2 px-2 font-bold text-gray-900">${escapeHtml(r.name)}</td>
-                                <td class="py-2 px-2 text-gray-600">${escapeHtml(r.service)}</td>
-                                <td class="py-2 px-2 text-right font-black text-blue-600">${formatMoney(r.amount)}</td>
-                            </tr>
-                        `;
-                    });
-                }
+            // Populate IT Table
+            const itRecords = reportRecords.filter(r => r.serviceType === 'IT');
+            const itTotal = itRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            document.getElementById('pdf-it-total').textContent = formatMoney(itTotal);
+
+            const itTbody = document.getElementById('pdf-it-tbody');
+            itTbody.innerHTML = '';
+            if(itRecords.length === 0) {
+                itTbody.innerHTML = `<tr><td colspan="3" class="py-2 px-2 text-center text-gray-400">No IT records.</td></tr>`;
+            } else {
+                itRecords.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-1.5 px-2 font-semibold">${r.name}</td>
+                        <td class="py-1.5 px-2 text-gray-600 whitespace-normal break-words">${r.service}</td>
+                        <td class="py-1.5 px-2 text-right font-bold text-blue-600">${formatMoney(r.amount)}</td>
+                    `;
+                    itTbody.appendChild(tr);
+                });
+            }
+
+            // Populate Expenses Table
+            document.getElementById('pdf-expenses-summary-badge').textContent = `Total Outlays: ${formatMoney(totalExp)}`;
+            const expTbody = document.getElementById('pdf-expenses-tbody');
+            expTbody.innerHTML = '';
+            if(reportExpenses.length === 0) {
+                expTbody.innerHTML = `<tr><td colspan="3" class="py-2 px-2 text-center text-gray-400">No operational expenses.</td></tr>`;
+            } else {
+                reportExpenses.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-1.5 px-2 text-gray-500">${e.date}</td>
+                        <td class="py-1.5 px-2 font-medium">${e.title}</td>
+                        <td class="py-1.5 px-2 text-right font-bold text-rose-600">${formatMoney(e.amount)}</td>
+                    `;
+                    expTbody.appendChild(tr);
+                });
             }
         }
 
         function exportReportToPDF() {
             const element = document.getElementById('pdf-report-document');
+            if(!element) return;
+
             const opt = {
                 margin:       10,
-                filename:     `MDDR_Enterprise_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+                filename:     `MDDR_Statement_${new Date().toISOString().split('T')[0]}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+                html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-            html2pdf().from(element).set(opt).save();
-            logAudit('Exported high-resolution financial report to PDF');
+
+            showToast("Generating PDF Statement...", "info");
+            html2pdf().set(opt).from(element).save().then(() => {
+                showToast("PDF downloaded successfully!", "success");
+            }).catch(err => {
+                console.error(err);
+                showToast("Failed to generate PDF.", "alert");
+            });
         }
 
+        // --- AUDIT TRAIL LOG ---
         function renderAuditLog() {
             const tbody = document.getElementById('audit-table-body');
             if(!tbody) return;
             tbody.innerHTML = '';
 
+            const logs = state.auditLog || [];
             const searchTerm = (document.getElementById('audit-search-input')?.value || '').toLowerCase();
-            const filterType = document.getElementById('audit-filter-type')?.value || 'ALL';
+            const catFilter = document.getElementById('audit-filter-type')?.value || 'ALL';
 
-            let filtered = (state.auditLog || []).filter(a => {
-                const matchSearch = a.time.toLowerCase().includes(searchTerm) ||
-                                    a.role.toLowerCase().includes(searchTerm) ||
-                                    a.action.toLowerCase().includes(searchTerm);
-                let matchType = true;
-                const actLower = a.action.toLowerCase();
-                if(filterType === 'Added' && !actLower.includes('add') && !actLower.includes('registered') && !actLower.includes('saved')) matchType = false;
-                if(filterType === 'Updated' && !actLower.includes('update') && !actLower.includes('edit')) matchType = false;
-                if(filterType === 'Deleted' && !actLower.includes('delete') && !actLower.includes('removed')) matchType = false;
-                return matchSearch && matchType;
+            const filtered = logs.filter(l => {
+                const matchSearch = l.action.toLowerCase().includes(searchTerm) || l.time.toLowerCase().includes(searchTerm);
+                let matchCat = true;
+                if(catFilter === 'Added') matchCat = l.action.toLowerCase().includes('created') || l.action.toLowerCase().includes('added');
+                if(catFilter === 'Updated') matchCat = l.action.toLowerCase().includes('updated') || l.action.toLowerCase().includes('modified');
+                if(catFilter === 'Deleted') matchCat = l.action.toLowerCase().includes('deleted') || l.action.toLowerCase().includes('clear');
+                return matchSearch && matchCat;
             });
 
-            const totalCount = (state.auditLog || []).length;
+            document.getElementById('audit-total-count').textContent = logs.length;
             const todayStr = new Date().toLocaleDateString();
-            const todayCount = (state.auditLog || []).filter(a => a.time.includes(todayStr)).length;
-            const dangerCount = (state.auditLog || []).filter(a => a.action.toLowerCase().includes('delete') || a.action.toLowerCase().includes('removed')).length;
+            document.getElementById('audit-today-count').textContent = logs.filter(l => l.time.includes(todayStr)).length;
+            document.getElementById('audit-danger-count').textContent = logs.filter(l => l.action.toLowerCase().includes('deleted')).length;
 
-            if(document.getElementById('audit-total-count')) document.getElementById('audit-total-count').textContent = totalCount;
-            if(document.getElementById('audit-today-count')) document.getElementById('audit-today-count').textContent = todayCount;
-            if(document.getElementById('audit-danger-count')) document.getElementById('audit-danger-count').textContent = dangerCount;
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No audit trail records found.</td></tr>`;
+                return;
+            }
 
-            filtered.forEach(a => {
-                let badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-gray-100 text-gray-700">System</span>';
-                const actLower = a.action.toLowerCase();
-                if(actLower.includes('add') || actLower.includes('saved') || actLower.includes('registered')) {
-                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-700">Creation</span>';
-                } else if(actLower.includes('update') || actLower.includes('edit')) {
-                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-blue-700">Modification</span>';
-                } else if(actLower.includes('delete') || actLower.includes('removed')) {
-                    badge = '<span class="px-2.5 py-0.5 text-[10px] font-bold rounded bg-red-100 text-red-700">Deletion</span>';
+            filtered.forEach(l => {
+                let catBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/10 text-blue-600">Info</span>';
+                if(l.action.toLowerCase().includes('deleted')) {
+                    catBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-500/10 text-red-600">Security / Delete</span>';
+                } else if(l.action.toLowerCase().includes('created') || l.action.toLowerCase().includes('added')) {
+                    catBadge = '<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/10 text-emerald-600">Creation</span>';
                 }
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
-                        <td class="p-3 font-mono text-gray-500">${a.time}</td>
-                        <td class="p-3 font-bold text-emerald-600">${a.role}</td>
-                        <td class="p-3 font-medium">${escapeHtml(a.action)}</td>
-                        <td class="p-3 text-center">${badge}</td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 text-gray-500 font-mono">${l.time}</td>
+                    <td class="p-3 font-bold text-gray-700 dark:text-gray-300">${l.role}</td>
+                    <td class="p-3 text-gray-900 dark:text-white font-medium">${l.action}</td>
+                    <td class="p-3 text-center">${catBadge}</td>
                 `;
+                tbody.appendChild(tr);
             });
-        }
-
-        function exportAuditCSV() {
-            let csv = 'Timestamp,User Role,Action Performed\n';
-            (state.auditLog || []).forEach(a => {
-                csv += `"${a.time}","${a.role}","${a.action.replace(/"/g, '""')}"\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `MDDR_Audit_Log_${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-            logAudit('Exported system audit trail to CSV');
         }
 
         function clearAuditLog() {
-            if(confirm('Are you sure you want to clear the entire audit log?')) {
+            if(confirm("Are you sure you want to clear system audit logs?")) {
                 state.auditLog = [];
                 saveState();
                 renderAuditLog();
+                showToast("Audit trail cleared", "info");
             }
         }
 
-        function exportJSONBackup() {
-            const fullBackup = {
-                appState: state,
-                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-            };
+        function exportAuditCSV() {
+            const logs = state.auditLog || [];
+            if(logs.length === 0) {
+                alert("No audit logs available to export.");
+                return;
+            }
+            let csvContent = "data:text/csv;charset=utf-8,Timestamp,Role,Action\n";
+            logs.forEach(l => {
+                csvContent += `"${l.time}","${l.role}","${l.action.replace(/"/g, '""')}"\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `MDDR_Audit_Log_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-            const blob = new Blob([JSON.stringify(fullBackup, null, 2)], {type: 'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `MDDR_Firestore_Backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            logAudit('Exported cloud database backup (JSON)');
+        // --- BACKUP & RESTORE DATA (JSON) ---
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `MDDR_Firestore_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            logAudit("Exported full Firestore database JSON backup");
+            showToast("Database backup downloaded", "success");
         }
 
         function importJSONBackup(e) {
             const file = e.target.files[0];
             if(!file) return;
+
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = function(event) {
                 try {
-                    const parsed = JSON.parse(evt.target.result);
-                    const targetState = parsed.appState || parsed;
-
-                    state = {
-                        currency: targetState.currency || 'RWF',
-                        fontSize: targetState.fontSize || 'md',
-                        records: targetState.records || [],
-                        expenses: targetState.expenses || [],
-                        inventory: targetState.inventory || [],
-                        bookings: targetState.bookings || [],
-                        auditLog: targetState.auditLog || []
-                    };
-
-                    const htmlEl = document.documentElement;
-                    if(parsed.theme === 'dark') {
-                        htmlEl.classList.add('dark');
-                    } else if(parsed.theme === 'light') {
-                        htmlEl.classList.remove('dark');
+                    const importedState = JSON.parse(event.target.result);
+                    if(importedState && Array.isArray(importedState.records)) {
+                        state = importedState;
+                        saveState();
+                        logAudit("Imported JSON database backup into Firestore");
+                        showToast("JSON Backup imported successfully!", "success");
+                    } else {
+                        alert("Invalid backup JSON structure.");
                     }
-
-                    saveState();
-                    refreshAllViews();
-                    switchTab('dashboard');
-                    logAudit('Imported database state from JSON into Firestore');
-                    alert('Firestore database successfully updated from JSON import!');
-                } catch(err) { 
-                    console.error(err);
-                    alert('Invalid backup JSON file.'); 
+                } catch(err) {
+                    alert("Error parsing JSON file.");
                 }
             };
             reader.readAsText(file);
-        }
-
-        function escapeHtml(str) {
-            if(!str) return '';
-            return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
         }
     </script>
 </body>
