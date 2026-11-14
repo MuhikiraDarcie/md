@@ -39,6 +39,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 
+    <!-- Firebase compatibility SDKs: Authentication + Cloud Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -255,7 +260,7 @@
             <div class="p-4 border-t border-gray-200 dark:border-gray-800">
                 <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span id="sidebar-cloud-status" class="font-medium flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Offline Mode</span>
-                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">Local Storage</span>
+                    <span id="sidebar-storage-label" class="text-emerald-600 dark:text-emerald-400 font-bold">Local + Cloud</span>
                 </div>
             </div>
         </aside>
@@ -1114,11 +1119,54 @@
                             </select>
                         </div>
 
+                        <!-- Firebase Cloud Database -->
+                        <section class="p-5 rounded-2xl border border-blue-500/25 bg-blue-500/5 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white"><i class="fa-solid fa-cloud text-blue-500 mr-2"></i>Firebase Cloud Database</h4>
+                                    <p class="text-xs text-gray-500 mt-1">Sync client records, bookings, inventory, expenses, projects, reports and audit history across your devices.</p>
+                                </div>
+                                <span id="firebase-connection-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600">Not configured</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="text-[10px] font-bold uppercase text-gray-500">Firebase API Key
+                                    <input id="firebase-api-key" type="text" autocomplete="off" placeholder="AIza..." class="mt-1 w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs normal-case">
+                                </label>
+                                <label class="text-[10px] font-bold uppercase text-gray-500">Project ID
+                                    <input id="firebase-project-id" type="text" autocomplete="off" placeholder="your-project-id" class="mt-1 w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs normal-case">
+                                </label>
+                                <label class="text-[10px] font-bold uppercase text-gray-500">Auth Domain
+                                    <input id="firebase-auth-domain" type="text" autocomplete="off" placeholder="your-project.firebaseapp.com" class="mt-1 w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs normal-case">
+                                </label>
+                                <label class="text-[10px] font-bold uppercase text-gray-500">App ID
+                                    <input id="firebase-app-id" type="text" autocomplete="off" placeholder="1:...:web:..." class="mt-1 w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs normal-case">
+                                </label>
+                                <label class="text-[10px] font-bold uppercase text-gray-500">Messaging Sender ID (optional)
+                                    <input id="firebase-sender-id" type="text" autocomplete="off" placeholder="Sender ID" class="mt-1 w-full px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs normal-case">
+                                </label>
+                            </div>
+                            <div class="border-t border-blue-500/20 pt-4 space-y-3">
+                                <p class="text-xs font-bold text-gray-800 dark:text-gray-200">Secure account sign-in</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input id="firebase-email" type="email" autocomplete="username" placeholder="Firebase account email" class="px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs">
+                                    <input id="firebase-password" type="password" autocomplete="current-password" placeholder="Password (minimum 6 characters)" class="px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs">
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" onclick="saveFirebaseConfigAndConnect()" class="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> Save Config & Connect</button>
+                                    <button type="button" onclick="firebaseCreateAccount()" class="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Create Account</button>
+                                    <button type="button" onclick="firebaseSignIn()" class="px-4 py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold">Sign In</button>
+                                    <button type="button" onclick="firebaseSignOut()" class="px-4 py-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white text-xs font-bold">Sign Out</button>
+                                </div>
+                                <p id="firebase-account-status" class="text-[11px] text-gray-500">Enter your Firebase web app configuration, then create an account or sign in. Your data is stored under your authenticated user account.</p>
+                            </div>
+                            <p class="text-[10px] text-gray-500 leading-relaxed">Local saving remains enabled for offline access. When connected, Firestore synchronizes your data automatically. Use the same Firebase project and account on every device.</p>
+                        </section>
+
                         <!-- Local offline data storage -->
                         <div class="p-5 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 space-y-2">
-                            <h4 class="font-bold text-sm text-emerald-700 dark:text-emerald-300"><i class="fa-solid fa-hard-drive mr-2"></i>Offline Storage</h4>
-                            <p class="text-xs text-gray-500">Your records are saved on this device in your browser storage. No offline database or cloud connection is used. Export backups regularly to protect your data.</p>
-                            <span class="text-xs font-bold text-emerald-600">Local-only mode active</span>
+                            <h4 class="font-bold text-sm text-emerald-700 dark:text-emerald-300"><i class="fa-solid fa-hard-drive mr-2"></i>Offline Backup & Cache</h4>
+                            <p class="text-xs text-gray-500">A local copy is maintained for offline access. When Firebase is connected, changes are synchronized with your private cloud account. Export backups regularly as an additional safeguard.</p>
+                            <span id="local-storage-status" class="text-xs font-bold text-emerald-600">Local backup active</span>
                         </div>
 
                         <!-- 5. Backup & Restore Data (Local JSON) -->
@@ -1322,6 +1370,15 @@
         let biFinancialChart = null;
         let db = null;
         let unsubscribeSnapshot = null;
+        let firebaseAuth = null;
+        let firebaseUser = null;
+        let cloudSyncReady = false;
+        let applyingCloudSnapshot = false;
+        let cloudSaveTimer = null;
+        let cloudListeners = [];
+        const FIREBASE_CONFIG_KEY = 'mddr_firebase_config_v1';
+        const CLOUD_COLLECTIONS = ['records','clients','expenses','inventory','stockMovements','bookings','projects','auditLog'];
+        const CLOUD_COLLECTION_PATH = name => db.collection('users').doc(firebaseUser.uid).collection('appData').doc(name).collection('items');
 
         window.onload = function() {
             initLiveClock();
@@ -1358,6 +1415,8 @@
             const sidebarStatus = document.getElementById('sidebar-cloud-status');
             if(sidebarStatus) sidebarStatus.innerHTML = '<i class="fa-solid fa-hard-drive text-emerald-500"></i> Offline • Saved Locally';
             switchTab('dashboard');
+            loadFirebaseConfigForm();
+            initializeFirebaseFromSavedConfig();
         };
 
         // --- TOAST NOTIFICATION SYSTEM ---
@@ -1379,15 +1438,19 @@
             }, 4000);
         }
 
-        // --- OFFLINE LOCAL STORAGE PERSISTENCE ---
+        // --- LOCAL + FIRESTORE CLOUD PERSISTENCE ---
         function saveState() {
             try {
                 localStorage.setItem('mddr_offline_state_v1', JSON.stringify(state));
                 const sidebarStatus = document.getElementById('sidebar-cloud-status');
-                if(sidebarStatus) sidebarStatus.innerHTML = '<i class="fa-solid fa-hard-drive text-emerald-500"></i> Offline • Saved Locally';
+                if(sidebarStatus && !cloudSyncReady) sidebarStatus.innerHTML = '<i class="fa-solid fa-hard-drive text-emerald-500"></i> Local backup saved';
             } catch(err) {
                 console.error('Local save failed:', err);
                 showToast('Unable to save locally. Export a backup and free browser storage space.', 'alert');
+            }
+            if (cloudSyncReady && !applyingCloudSnapshot) {
+                clearTimeout(cloudSaveTimer);
+                cloudSaveTimer = setTimeout(() => syncStateToFirestore(), 700);
             }
         }
 
@@ -3662,6 +3725,327 @@
             };
             reader.readAsText(file);
         }
+
+        // --- FIREBASE CONFIGURATION, AUTHENTICATION AND REAL-TIME SYNC ---
+        let cloudBaseline = null;
+        let cloudInitialLoads = {};
+        let cloudSyncInProgress = false;
+
+        function firebaseSetStatus(message, connected=false, error=false) {
+            const status = document.getElementById('sidebar-cloud-status');
+            const badge = document.getElementById('firebase-connection-badge');
+            const account = document.getElementById('firebase-account-status');
+            if(status) status.innerHTML = connected
+                ? '<i class="fa-solid fa-cloud text-emerald-500"></i> Cloud • Synced'
+                : error ? '<i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Cloud error'
+                : '<i class="fa-solid fa-hard-drive text-amber-500"></i> Local backup';
+            if(badge) {
+                badge.textContent = connected ? 'Cloud connected' : error ? 'Connection issue' : 'Not connected';
+                badge.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full ' +
+                    (connected ? 'bg-emerald-500/10 text-emerald-600' : error ? 'bg-rose-500/10 text-rose-600' : 'bg-amber-500/10 text-amber-600');
+            }
+            if(account && message) account.textContent = message;
+        }
+
+        function getFirebaseConfigFromForm() {
+            return {
+                apiKey: document.getElementById('firebase-api-key')?.value.trim() || '',
+                authDomain: document.getElementById('firebase-auth-domain')?.value.trim() || '',
+                projectId: document.getElementById('firebase-project-id')?.value.trim() || '',
+                storageBucket: '',
+                messagingSenderId: document.getElementById('firebase-sender-id')?.value.trim() || '',
+                appId: document.getElementById('firebase-app-id')?.value.trim() || ''
+            };
+        }
+
+        function loadFirebaseConfigForm() {
+            try {
+                const config = JSON.parse(localStorage.getItem(FIREBASE_CONFIG_KEY) || 'null');
+                if(!config) return;
+                document.getElementById('firebase-api-key').value = config.apiKey || '';
+                document.getElementById('firebase-auth-domain').value = config.authDomain || '';
+                document.getElementById('firebase-project-id').value = config.projectId || '';
+                document.getElementById('firebase-sender-id').value = config.messagingSenderId || '';
+                document.getElementById('firebase-app-id').value = config.appId || '';
+            } catch(error) { console.warn('Could not load Firebase configuration.', error); }
+        }
+
+        function initializeFirebaseFromSavedConfig() {
+            let config;
+            try { config = JSON.parse(localStorage.getItem(FIREBASE_CONFIG_KEY) || 'null'); }
+            catch(error) { config = null; }
+            if(!config || !config.apiKey || !config.projectId || !config.appId) {
+                firebaseSetStatus('Add your Firebase web app configuration to enable cloud sync.');
+                return;
+            }
+            try {
+                if(!firebase.apps.length) firebase.initializeApp(config);
+                firebaseAuth = firebase.auth();
+                db = firebase.firestore();
+                firebaseAuth.onAuthStateChanged(user => {
+                    firebaseUser = user || null;
+                    if(user) startFirestoreListeners();
+                    else {
+                        cloudSyncReady = false;
+                        cloudListeners.forEach(unsubscribe => { try { unsubscribe(); } catch(e) {} });
+                        cloudListeners = [];
+                        firebaseSetStatus('Firebase is configured. Sign in to synchronize your private business data.');
+                    }
+                });
+                firebaseSetStatus('Firebase configured. Sign in with your account to start synchronization.');
+            } catch(error) {
+                console.error('Firebase initialization failed:', error);
+                firebaseSetStatus('Firebase setup failed: ' + error.message, false, true);
+            }
+        }
+
+        function saveFirebaseConfigAndConnect() {
+            const config = getFirebaseConfigFromForm();
+            if(!config.apiKey || !config.authDomain || !config.projectId || !config.appId) {
+                showToast('Enter API Key, Auth Domain, Project ID and App ID.', 'alert');
+                return;
+            }
+            try { localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(config)); }
+            catch(error) { showToast('Could not save Firebase configuration in this browser.', 'alert'); return; }
+            if(firebase.apps.length) {
+                showToast('Configuration saved. Reload the app to apply a different Firebase project.', 'info');
+                firebaseSetStatus('Configuration saved. Reload this page to apply the Firebase project settings.');
+                return;
+            }
+            initializeFirebaseFromSavedConfig();
+            showToast('Firebase configuration saved.', 'success');
+        }
+
+        async function firebaseCreateAccount() {
+            if(!firebaseAuth) initializeFirebaseFromSavedConfig();
+            const email = document.getElementById('firebase-email').value.trim();
+            const password = document.getElementById('firebase-password').value;
+            if(!firebaseAuth) { showToast('Save valid Firebase configuration first.', 'alert'); return; }
+            if(!email || password.length < 6) { showToast('Enter a valid email and a password of at least 6 characters.', 'alert'); return; }
+            try {
+                await firebaseAuth.createUserWithEmailAndPassword(email, password);
+                showToast('Account created. Cloud synchronization is starting.', 'success');
+            } catch(error) {
+                console.error(error);
+                showToast(firebaseAuthErrorMessage(error), 'alert');
+            }
+        }
+
+        async function firebaseSignIn() {
+            if(!firebaseAuth) initializeFirebaseFromSavedConfig();
+            const email = document.getElementById('firebase-email').value.trim();
+            const password = document.getElementById('firebase-password').value;
+            if(!firebaseAuth) { showToast('Save valid Firebase configuration first.', 'alert'); return; }
+            if(!email || !password) { showToast('Enter your account email and password.', 'alert'); return; }
+            try {
+                await firebaseAuth.signInWithEmailAndPassword(email, password);
+                showToast('Signed in. Connecting to Firestore...', 'success');
+            } catch(error) {
+                console.error(error);
+                showToast(firebaseAuthErrorMessage(error), 'alert');
+            }
+        }
+
+        async function firebaseSignOut() {
+            if(!firebaseAuth) return;
+            try {
+                await firebaseAuth.signOut();
+                cloudSyncReady = false;
+                cloudBaseline = null;
+                firebaseSetStatus('Signed out. This device will continue saving locally.');
+                showToast('Signed out of Firebase.', 'success');
+            } catch(error) { showToast(firebaseAuthErrorMessage(error), 'alert'); }
+        }
+
+        function firebaseAuthErrorMessage(error) {
+            const messages = {
+                'auth/email-already-in-use':'This email already has an account. Sign in instead.',
+                'auth/invalid-email':'The email address is invalid.',
+                'auth/weak-password':'Use a stronger password with at least 6 characters.',
+                'auth/user-not-found':'No account was found for this email.',
+                'auth/wrong-password':'The password is incorrect.',
+                'auth/invalid-credential':'The email or password is incorrect.',
+                'auth/operation-not-allowed':'Enable Email/Password sign-in in Firebase Authentication.'
+            };
+            return messages[error.code] || error.message || 'Firebase authentication failed.';
+        }
+
+        function cloudDocId(value, fallback) {
+            return String(value ?? fallback).replaceAll('/', '_').replaceAll('.', '_').slice(0, 1400);
+        }
+
+        function cloudClone(value) {
+            return JSON.parse(JSON.stringify(value));
+        }
+
+        function cloudCollectionValues(name) {
+            if(name === 'reportJournals') {
+                return Object.entries(state.reportJournals || {}).map(([key,value]) => ({...value, id:key, _journalKey:key}));
+            }
+            return Array.isArray(state[name]) ? state[name] : [];
+        }
+
+        function applyCloudCollection(name, docs) {
+            const values = docs.map(doc => {
+                const data = {...doc.data()};
+                delete data._cloudOrder;
+                delete data._cloudUpdatedAt;
+                if(name === 'reportJournals') {
+                    const key = data._journalKey || doc.id;
+                    delete data._journalKey;
+                    return [key, data];
+                }
+                return data;
+            });
+            if(name === 'reportJournals') state.reportJournals = Object.fromEntries(values);
+            else state[name] = values;
+        }
+
+        async function writeInitialCloudCollection(name, values) {
+            const collection = CLOUD_COLLECTION_PATH(name);
+            for(let offset=0; offset<values.length; offset+=400) {
+                const batch = db.batch();
+                values.slice(offset, offset+400).forEach((item,index) => {
+                    const rawId = name === 'reportJournals' ? item._journalKey : item.id;
+                    const id = cloudDocId(rawId, `${name}-${offset+index}`);
+                    const data = {...item, _cloudOrder:offset+index, _cloudUpdatedAt:Date.now()};
+                    batch.set(collection.doc(id), data);
+                });
+                await batch.commit();
+            }
+        }
+
+        function startFirestoreListeners() {
+            if(!firebaseUser || !db) return;
+            cloudListeners.forEach(unsubscribe => { try { unsubscribe(); } catch(e) {} });
+            cloudListeners = [];
+            cloudSyncReady = false;
+            cloudInitialLoads = {};
+            const allNames = [...CLOUD_COLLECTIONS, 'reportJournals', 'appSettings'];
+            allNames.forEach(name => cloudInitialLoads[name] = false);
+
+            CLOUD_COLLECTIONS.concat(['reportJournals']).forEach(name => {
+                const ref = CLOUD_COLLECTION_PATH(name);
+                const unsubscribe = ref.onSnapshot(async snapshot => {
+                    const isFirst = !cloudInitialLoads[name];
+                    applyingCloudSnapshot = true;
+                    try {
+                        if(isFirst && snapshot.empty) {
+                            const localValues = cloudCollectionValues(name);
+                            if(localValues.length) await writeInitialCloudCollection(name, localValues);
+                            else applyCloudCollection(name, []);
+                        } else {
+                            const ordered = snapshot.docs.slice().sort((a,b) =>
+                                (Number(a.data()._cloudOrder)||0) - (Number(b.data()._cloudOrder)||0));
+                            applyCloudCollection(name, ordered);
+                        }
+                        if(cloudBaseline) {
+                            if(name === 'reportJournals') cloudBaseline.reportJournals = cloudClone(state.reportJournals || {});
+                            else cloudBaseline[name] = cloudClone(state[name] || []);
+                        }
+                        refreshAllViews();
+                        try { localStorage.setItem('mddr_offline_state_v1', JSON.stringify(state)); } catch(e) {}
+                    } catch(error) {
+                        console.error('Firestore collection load failed:', name, error);
+                        firebaseSetStatus('Could not load ' + name + ': ' + error.message, false, true);
+                    } finally {
+                        cloudInitialLoads[name] = true;
+                        applyingCloudSnapshot = false;
+                        finishCloudInitialLoad();
+                    }
+                }, error => {
+                    console.error('Firestore listener error:', error);
+                    firebaseSetStatus('Firestore access denied or unavailable: ' + error.message, false, true);
+                });
+                cloudListeners.push(unsubscribe);
+            });
+
+            const settingsRef = db.collection('users').doc(firebaseUser.uid).collection('appData').doc('settings');
+            cloudListeners.push(settingsRef.onSnapshot(snapshot => {
+                applyingCloudSnapshot = true;
+                if(snapshot.exists) {
+                    const settings = snapshot.data();
+                    if(settings.currency) state.currency = settings.currency;
+                    if(settings.fontSize) state.fontSize = settings.fontSize;
+                    if(cloudBaseline) {
+                        cloudBaseline.currency = state.currency;
+                        cloudBaseline.fontSize = state.fontSize;
+                    }
+                    refreshAllViews();
+                    try { localStorage.setItem('mddr_offline_state_v1', JSON.stringify(state)); } catch(e) {}
+                }
+                cloudInitialLoads.appSettings = true;
+                applyingCloudSnapshot = false;
+                finishCloudInitialLoad();
+            }, error => {
+                console.error('Firestore settings listener error:', error);
+                firebaseSetStatus('Could not read cloud settings: ' + error.message, false, true);
+            }));
+            firebaseSetStatus('Signed in as ' + firebaseUser.email + '. Loading your cloud data...');
+        }
+
+        function finishCloudInitialLoad() {
+            if(cloudSyncReady || !Object.values(cloudInitialLoads).every(Boolean)) return;
+            cloudSyncReady = true;
+            cloudBaseline = cloudClone(state);
+            try { localStorage.setItem('mddr_offline_state_v1', JSON.stringify(state)); } catch(e) {}
+            refreshAllViews();
+            firebaseSetStatus('Connected as ' + (firebaseUser.email || firebaseUser.uid) + '. Your data is synchronized.', true);
+            syncStateToFirestore(); // Also persist account-level settings on first connection.
+            showToast('Firestore connected. Your business data is now syncing.', 'success');
+        }
+
+        async function syncStateToFirestore() {
+            if(!cloudSyncReady || !firebaseUser || !db || cloudSyncInProgress || applyingCloudSnapshot) return;
+            cloudSyncInProgress = true;
+            try {
+                const previous = cloudBaseline || {};
+                const names = CLOUD_COLLECTIONS.concat(['reportJournals']);
+                for(const name of names) {
+                    const before = name === 'reportJournals'
+                        ? Object.entries(previous.reportJournals || {}).map(([id,value])=>({id,value}))
+                        : (previous[name] || []).map(item=>({id:item.id,value:item}));
+                    const current = name === 'reportJournals'
+                        ? Object.entries(state.reportJournals || {}).map(([id,value])=>({id,value}))
+                        : (state[name] || []).map(item=>({id:item.id,value:item}));
+                    const beforeMap = new Map(before.map(x=>[String(x.id), JSON.stringify(x.value)]));
+                    const currentMap = new Map(current.map(x=>[String(x.id), JSON.stringify(x.value)]));
+                    const ref = CLOUD_COLLECTION_PATH(name);
+                    const operations = [];
+                    current.forEach((entry,index) => {
+                        const id = cloudDocId(entry.id, `${name}-${index}`);
+                        if(beforeMap.get(String(entry.id)) !== JSON.stringify(entry.value)) {
+                            const data = name === 'reportJournals'
+                                ? {...entry.value, _journalKey:String(entry.id), _cloudOrder:index, _cloudUpdatedAt:Date.now()}
+                                : {...entry.value, _cloudOrder:index, _cloudUpdatedAt:Date.now()};
+                            operations.push({type:'set', ref:ref.doc(id), data});
+                        }
+                    });
+                    before.forEach(entry => {
+                        if(!currentMap.has(String(entry.id))) operations.push({type:'delete', ref:ref.doc(cloudDocId(entry.id, entry.id))});
+                    });
+                    for(let offset=0; offset<operations.length; offset+=450) {
+                        const batch = db.batch();
+                        operations.slice(offset,offset+450).forEach(op => {
+                            if(op.type==='set') batch.set(op.ref,op.data);
+                            else batch.delete(op.ref);
+                        });
+                        await batch.commit();
+                    }
+                }
+                const settingsRef = db.collection('users').doc(firebaseUser.uid).collection('appData').doc('settings');
+                await settingsRef.set({currency:state.currency || 'RWF', fontSize:state.fontSize || 'md', updatedAt:Date.now()},{merge:true});
+                cloudBaseline = cloudClone(state);
+                firebaseSetStatus('All changes saved to Firestore.', true);
+            } catch(error) {
+                console.error('Firestore sync failed:', error);
+                firebaseSetStatus('Cloud sync failed: ' + error.message + '. Local copy is safe.', false, true);
+                showToast('Cloud sync failed. Your local backup is safe; check Firebase rules and connection.', 'alert');
+            } finally {
+                cloudSyncInProgress = false;
+            }
+        }
+
     </script>
 </body>
 </html>
